@@ -15,12 +15,9 @@ import android.widget.Button
 import android.widget.ListView
 import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_main.*
-import java.io.File
-import java.io.FileWriter
-import java.io.PrintWriter
 import android.widget.ArrayAdapter
-
-
+import java.io.*
+import java.io.File
 
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
@@ -29,16 +26,20 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private var accel : Sensor ?= null
     private var stepB = false
     private var climbB = false
+    var infoS = arrayListOf<String>()
+    var infoC = arrayListOf<String>()
+
 
     private var arrayAdapter: ArrayAdapter<String>? = null
     private var listView: ListView? = null
     private var listSensorData = arrayListOf<String>()  //used to store sensor data
 
-
     val fileS = File(Environment.getExternalStoragePublicDirectory(
         Environment.DIRECTORY_DOCUMENTS), "step.txt")
     val fileC = File(Environment.getExternalStoragePublicDirectory(
         Environment.DIRECTORY_DOCUMENTS), "climb.txt")
+
+
 
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
@@ -47,39 +48,31 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onSensorChanged(event: SensorEvent?) {
 
-        if (event!!.sensor.type == Sensor.TYPE_ACCELEROMETER) {
-            var data = ("x = ${event!!.values[0]} " +
-                    "y = ${event.values[1]} " +
-                    "z = ${event.values[2]} ")
-            listSensorData.add(data)
-            arrayAdapter!!.notifyDataSetChanged()
-        }
-       /* var text = " x = ${event!!.values[0]}\n\n" +
-                " y = ${event.values[1]}\n\n" +
-                " z = ${event.values[2]}\n\n"*/
-
         var text1:TextView = findViewById(R.id.text1)
 
-
-
-        if (event!!.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
-            fileS.appendText("x = ${event!!.values[0]}\r\r" +
-                    "y = ${event.values[1]}\r\r" +
-                    "z = ${event.values[2]}\r\r")
-
-        }
 
         text1.text = "x = ${event!!.values[0]}\n\n" +
                     "y = ${event.values[1]}\n\n" +
                     "z = ${event.values[2]}\n\n"
 
-/*
-        fileS.appendText("x = ${event!!.values[0]}\r\r" +
-                "y = ${event.values[1]}\r\r" +
-                "z = ${event.values[2]}\r\r")
+        infoS.add(" x = ${event!!.values[0]}, " +
+                " y = ${event.values[1]}, " +
+                " z = ${event.values[2]}  +")
 
-        fileS.appendText(text)
-        fileS.appendText("\r")*/
+        if (stepB == true) {
+            infoS.add(" x = ${event!!.values[0]}, " +
+                    " y = ${event.values[1]}, " +
+                    " z = ${event.values[2]}  +")
+
+
+        }
+        if (climbB == true) {
+            infoC.add(" x = ${event!!.values[0]}, " +
+                    " y = ${event.values[1]}, " +
+                    " z = ${event.values[2]}  +")
+
+        }
+
     }
 
 
@@ -95,13 +88,14 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
 
 
-        var step: Button =findViewById(R.id.step)
+        var step: Button = findViewById(R.id.step)
         var climb: Button = findViewById(R.id.climb)
 
         sensorMan = getSystemService(Context.SENSOR_SERVICE) as SensorManager
 
 
         step.setOnClickListener {
+
             if (stepB == false) {
                 stepB = true
                 //val file = File(fileNameStep)
@@ -157,6 +151,15 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             var data:ListView = findViewById(R.id.list)
             data.visibility = View.VISIBLE
 
+
+            true
+        }
+        R.id.write -> {
+
+            fileS.writeText("walk =  " + infoS.toString())
+            infoS.clear()
+            fileC.writeText("climb =  " + infoC.toString())
+            infoC.clear()
 
             true
         }
