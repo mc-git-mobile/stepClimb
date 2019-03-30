@@ -26,6 +26,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private var accel : Sensor ?= null
     private var stepB = false
     private var climbB = false
+    var infoX = arrayListOf<Float>()
+
     var infoS = arrayListOf<String>()
     var infoC = arrayListOf<String>()
 
@@ -49,6 +51,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     override fun onSensorChanged(event: SensorEvent?) {
 
         var text1:TextView = findViewById(R.id.text1)
+
+        infoX.add(event!!.values[1])
+
+        var i = 0
+
+        if (infoX[i] > infoX[i-1]
 
 
         text1.text = "x = ${event!!.values[0]}\n\n" +
@@ -140,8 +148,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         R.id.view -> {
             var textD:TextView = findViewById(R.id.text1)
             textD.visibility = View.INVISIBLE
-            var textM:TextView = findViewById(R.id.text3)
-            textM.visibility = View.INVISIBLE
+
+            var textC:TextView = findViewById(R.id.climbCount)
+            textC.visibility = View.INVISIBLE
+
+            var textS:TextView = findViewById(R.id.stepCount)
+            textS.visibility = View.INVISIBLE
 
             var bC:Button = findViewById(R.id.climb)
             bC.visibility = View.INVISIBLE
@@ -166,8 +178,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         R.id.back -> {
             var textD:TextView = findViewById(R.id.text1)
             textD.visibility = View.VISIBLE
-            var textM:TextView = findViewById(R.id.text3)
-            textM.visibility = View.VISIBLE
+            var textC:TextView = findViewById(R.id.climbCount)
+            textC.visibility = View.VISIBLE
+
+            var textS:TextView = findViewById(R.id.stepCount)
+            textS.visibility = View.VISIBLE
 
             var bC:Button = findViewById(R.id.climb)
             bC.visibility = View.VISIBLE

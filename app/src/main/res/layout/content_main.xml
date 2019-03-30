@@ -19,15 +19,25 @@
             app:layout_constraintHorizontal_bias="0.446" android:gravity="center" android:textSize="18sp"
             android:id="@+id/text1"/>
     <TextView
-            android:layout_width="317dp"
+            android:layout_width="149dp"
             android:layout_height="90dp"
-            android:text="@string/get_ready"
+            android:text="climb"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent" app:layout_constraintVertical_bias="0.379"
-            app:layout_constraintHorizontal_bias="0.446" android:gravity="center" android:textSize="30sp"
-            android:id="@+id/text3"/>
+            app:layout_constraintHorizontal_bias="0.16" android:gravity="center" android:textSize="30sp"
+            android:id="@+id/climbCount"/>
+    <TextView
+            android:layout_width="149dp"
+            android:layout_height="90dp"
+            android:text="step"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" app:layout_constraintVertical_bias="0.379"
+            app:layout_constraintHorizontal_bias="0.801" android:gravity="center" android:textSize="30sp"
+            android:id="@+id/stepCount"/>
     <Button
             android:text="@string/climb"
             android:layout_width="194dp"
