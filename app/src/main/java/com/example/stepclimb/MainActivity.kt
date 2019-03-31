@@ -19,6 +19,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import android.widget.ArrayAdapter
 import java.io.*
 import java.io.File
+import java.lang.Math.sqrt
 
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
@@ -28,12 +29,29 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private var stepB = false
     private var climbB = false
     var infoX = arrayListOf<Float>()
+    var infoZ = arrayListOf<Double>()
+
     var i = 0
+    var j = 3
+    var h = 2
+    var step = 0
+
     var stepCounter = 0
+    var climbCounter = 0
+
 
 
     var infoS = arrayListOf<String>()
     var infoC = arrayListOf<String>()
+    var infoD = arrayListOf<String>()
+    var infoN = arrayListOf<Double>()
+
+
+    var d:Double = 0.0
+    var c:Double = 0.0
+
+
+
 
 
     private var arrayAdapter: ArrayAdapter<String>? = null
@@ -44,6 +62,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         Environment.DIRECTORY_DOCUMENTS), "step.txt")
     val fileC = File(Environment.getExternalStoragePublicDirectory(
         Environment.DIRECTORY_DOCUMENTS), "climb.txt")
+    val fileD = File(Environment.getExternalStoragePublicDirectory(
+        Environment.DIRECTORY_DOCUMENTS), "D.txt")
+    val fileN = File(Environment.getExternalStoragePublicDirectory(
+        Environment.DIRECTORY_DOCUMENTS), "N.txt")
 
 
 
@@ -63,33 +85,97 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
         infoX.add(event!!.values[1])
 
-        //var i = 1
-        //var stepCounter = 0
+        c = (event.values[0].toDouble()*event.values[0].toDouble())+(event.values[1].toDouble()*event.values[1].toDouble())+(event.values[2].toDouble()*event.values[2].toDouble())
+
+        d = sqrt(c)
+
+        infoZ.add(d)
+
+        //infoD.add(d.toString())
+
+        if (infoZ.size > 3) {
+
+            if ( (infoZ[i-1] > infoZ[i-2]) && (infoZ[i-1] > infoZ[i]) ) {
+                infoN.add(infoZ[i-1])
+                h++
+                j++
+
+            }
+            if ( (infoZ[i-1] < infoZ[i-2]) && (infoZ[i-1] < infoZ[i]) ) {
+                infoN.add(infoZ[i-1])
+                h++
+                j++
+            }
+
+            Log.i("infoN ", infoN.toString())
+
+
+        }
+        //Log.i("infoN", infoN[i].toString())
+        Log.i("infoN size", infoN.size.toString())
+        Log.i("j", j.toString())
+
+
+        if (infoN.size > j){
+            if ((infoN[j] - infoN[h]) > 0.05 /*|| (infoN[h] - infoN[j]) < (- 0.05)*/ ){
+
+                step ++
+                Log.i("info n h", infoN[h].toString())
+                Log.i("info n j", infoN[j].toString())
+                Log.i("info n h- j", (infoN[h]- infoN[j]).toString())
+                //climbBox.setText((infoN[h]- infoN[j]).toString())
+
+
+                //h++
+                //j++
+                //Log.i("info n h", infoN[h].toString())
+                //Log.i("info n j", infoN[j].toString())
+                //stepBox.setText((infoN[h]- infoN[j]).toString())
+
+
+            }
+        }
+
+        stepBox.setText(step.toString())
+        //Log.i("info n h", infoN[h].toString())
+        //Log.i("info n j", infoN[j].toString())
+
+
+        Log.i("step count", step.toString())
+
+
+
+        if (infoD.size > 3) {
+
+            if ( (infoD[i-1] > infoD[i-2]) && (infoD[i-1] > infoD[i]) ) {
+                if (stepB == true) {
+                    stepCounter +=1
+                }
+
+                if (climbB == true) {
+                    climbCounter += 1
+                }
+            }
+        }
+
 
 
         if (infoX.size > 3) {
 
             if ( (infoX[i-1] > infoX[i-2]) && (infoX[i-1] > infoX[i]) ) {
-                stepCounter +=1
-                println("counted")
+                //stepCounter +=1
+                //climbCounter += 1
 
                 // stepBox.setText(stepCounter)
             }
         }
-/*
-        if ( /*( i >= 2 ) &&*/ infoX.size > 2 && (infoX[i] > infoX[i-1]) && (infoX[i] > infoX[i+1]) ) {
-            stepCounter +=1
-            println("counted")
-            Log.i("sensor",  "in if")
 
-            // stepBox.setText(stepCounter)
-        }*/
         if (stepB == true) {
-            stepBox.setText(stepCounter.toString())
+            //stepBox.setText(stepCounter.toString())
         }
 
         if (climbB == true) {
-            climbBox.setText(stepCounter.toString())
+            //climbBox.setText(climbCounter.toString())
         }
 
 
@@ -102,12 +188,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     "z = ${event.values[2]}\n\n"
 
 
-/*
-        infoS.add(" x = ${event!!.values[0]}, " +
-                " y = ${event.values[1]}, " +
-                " z = ${event.values[2]}  +")
-
-        */
 
         if (stepB == true) {
             infoS.add(" x = ${event!!.values[0]}, " +
@@ -168,7 +248,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     climbB = false
                 }
                 //val file = File(fileNameStep)
-                sensorMan.registerListener(this, sensorMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_FASTEST, SensorManager.SENSOR_STATUS_ACCURACY_LOW)
+                sensorMan.registerListener(this, sensorMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL, SensorManager.SENSOR_STATUS_ACCURACY_HIGH)
+                //sensorMan.sensor
 
 
             }
@@ -187,7 +268,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 }
 
                 //val file = File(fileNameClimb)
-                sensorMan.registerListener(this, sensorMan.getDefaultSensor(Sensor.TYPE_GRAVITY), SensorManager.SENSOR_DELAY_FASTEST, SensorManager.SENSOR_STATUS_ACCURACY_LOW)
+                sensorMan.registerListener(this, sensorMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL, SensorManager.SENSOR_STATUS_ACCURACY_HIGH)
 
             }
             else if (climbB == true) {
@@ -237,8 +318,15 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
             fileS.writeText("walk =  " + infoS.toString())
             infoS.clear()
+
             fileC.writeText("climb =  " + infoC.toString())
             infoC.clear()
+
+            fileD.writeText("D =  " + infoD.toString())
+            infoD.clear()
+
+            fileN.writeText("N =  " + infoN.toString())
+            infoN.clear()
 
             true
         }
