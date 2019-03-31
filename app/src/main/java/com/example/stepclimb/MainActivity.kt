@@ -55,41 +55,23 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     override fun onSensorChanged(event: SensorEvent?) {
 
         var text1:TextView = findViewById(R.id.text1)
-        var stepBox:TextView = findViewById(R.id.stepCount)
-        Log.i("sensor", "sensor changed")
+        //var text2:TextView = findViewById(R.id.text1)
 
+        var stepBox:TextView = findViewById(R.id.stepCount)
+        var climbBox:TextView = findViewById(R.id.climbCount)
 
 
         infoX.add(event!!.values[1])
 
-        Log.i("sensor", infoX.size.toString()+ " infoX.size")
-        //Log.i("sensor", infoX[1].toString())+ " y value")
-
-
-
-
         //var i = 1
         //var stepCounter = 0
-        Log.i("sensor", i.toString() + " i before")
-        //Log.i("sensor", infoX[i].toString() + " i before")
+
 
         if (infoX.size > 3) {
-            Log.i("sensor",  "infoX size > 3")
-            Log.i("sensor",  infoX[i].toString() + " infoX  i ")
-
-            Log.i("sensor",  infoX[i-1].toString() + " infoX  i -1")
-            Log.i("sensor",  infoX[i-2].toString() + " infoX  i -2")
-            //Log.i("sensor",  infoX[i].toString() + " infoX  i ")
-
-
-            Log.i("sensor",  "infoX size > 3")
-
-
 
             if ( (infoX[i-1] > infoX[i-2]) && (infoX[i-1] > infoX[i]) ) {
                 stepCounter +=1
                 println("counted")
-                Log.i("sensor",  "in if")
 
                 // stepBox.setText(stepCounter)
             }
@@ -102,21 +84,46 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
             // stepBox.setText(stepCounter)
         }*/
-        stepBox.setText(stepCounter.toString())
-        //println("did not count")
-        Log.i("sensor", stepCounter.toString() + " step count")
+        if (stepB == true) {
+            stepBox.setText(stepCounter.toString())
+        }
+
+        if (climbB == true) {
+            climbBox.setText(stepCounter.toString())
+        }
+
+
+        //stepBox.setText(stepCounter.toString())
 
         i +=1
-        Log.i("sensor", i.toString() + " i after if")
-
 
         text1.text = "x = ${event!!.values[0]}\n\n" +
                     "y = ${event.values[1]}\n\n" +
                     "z = ${event.values[2]}\n\n"
 
+
+/*
         infoS.add(" x = ${event!!.values[0]}, " +
                 " y = ${event.values[1]}, " +
                 " z = ${event.values[2]}  +")
+
+        */
+
+        if (stepB == true) {
+            infoS.add(" x = ${event!!.values[0]}, " +
+                    " y = ${event.values[1]}, " +
+                    " z = ${event.values[2]}  +")
+        }
+
+        if (climbB == true) {
+            infoC.add(" x = ${event!!.values[0]}, " +
+                    " y = ${event.values[1]}, " +
+                    " z = ${event.values[2]}  +")
+        }
+
+
+
+
 
         if (stepB == true) {
             infoS.add(" x = ${event!!.values[0]}, " +
@@ -157,8 +164,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
             if (stepB == false) {
                 stepB = true
+                if(climbB == true) {
+                    climbB = false
+                }
                 //val file = File(fileNameStep)
-                sensorMan.registerListener(this, sensorMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL)
+                sensorMan.registerListener(this, sensorMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_FASTEST, SensorManager.SENSOR_STATUS_ACCURACY_LOW)
+
 
             }
             else if (stepB == true) {
@@ -171,8 +182,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         climb.setOnClickListener {
             if (climbB == false) {
                 climbB = true
+                if(stepB == true) {
+                    stepB = false
+                }
+
                 //val file = File(fileNameClimb)
-                sensorMan.registerListener(this, sensorMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL)
+                sensorMan.registerListener(this, sensorMan.getDefaultSensor(Sensor.TYPE_GRAVITY), SensorManager.SENSOR_DELAY_FASTEST, SensorManager.SENSOR_STATUS_ACCURACY_LOW)
 
             }
             else if (climbB == true) {
@@ -218,7 +233,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             true
         }
 
-        R.id.save -> {
+        R.id.write -> {
 
             fileS.writeText("walk =  " + infoS.toString())
             infoS.clear()
@@ -227,6 +242,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
             true
         }
+
         R.id.back -> {
             var textD:TextView = findViewById(R.id.text1)
             textD.visibility = View.VISIBLE
