@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.hardware.SensorEvent
 import android.os.Environment
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -27,6 +28,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private var stepB = false
     private var climbB = false
     var infoX = arrayListOf<Float>()
+    var i = 0
+    var stepCounter = 0
+
 
     var infoS = arrayListOf<String>()
     var infoC = arrayListOf<String>()
@@ -51,12 +55,59 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     override fun onSensorChanged(event: SensorEvent?) {
 
         var text1:TextView = findViewById(R.id.text1)
+        var stepBox:TextView = findViewById(R.id.stepCount)
+        Log.i("sensor", "sensor changed")
+
+
 
         infoX.add(event!!.values[1])
 
-        var i = 0
+        Log.i("sensor", infoX.size.toString()+ " infoX.size")
+        //Log.i("sensor", infoX[1].toString())+ " y value")
 
-        if (infoX[i] > infoX[i-1]
+
+
+
+        //var i = 1
+        //var stepCounter = 0
+        Log.i("sensor", i.toString() + " i before")
+        //Log.i("sensor", infoX[i].toString() + " i before")
+
+        if (infoX.size > 3) {
+            Log.i("sensor",  "infoX size > 3")
+            Log.i("sensor",  infoX[i].toString() + " infoX  i ")
+
+            Log.i("sensor",  infoX[i-1].toString() + " infoX  i -1")
+            Log.i("sensor",  infoX[i-2].toString() + " infoX  i -2")
+            //Log.i("sensor",  infoX[i].toString() + " infoX  i ")
+
+
+            Log.i("sensor",  "infoX size > 3")
+
+
+
+            if ( (infoX[i-1] > infoX[i-2]) && (infoX[i-1] > infoX[i]) ) {
+                stepCounter +=1
+                println("counted")
+                Log.i("sensor",  "in if")
+
+                // stepBox.setText(stepCounter)
+            }
+        }
+/*
+        if ( /*( i >= 2 ) &&*/ infoX.size > 2 && (infoX[i] > infoX[i-1]) && (infoX[i] > infoX[i+1]) ) {
+            stepCounter +=1
+            println("counted")
+            Log.i("sensor",  "in if")
+
+            // stepBox.setText(stepCounter)
+        }*/
+        stepBox.setText(stepCounter.toString())
+        //println("did not count")
+        Log.i("sensor", stepCounter.toString() + " step count")
+
+        i +=1
+        Log.i("sensor", i.toString() + " i after if")
 
 
         text1.text = "x = ${event!!.values[0]}\n\n" +
@@ -166,7 +217,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
             true
         }
-        R.id.write -> {
+
+        R.id.save -> {
 
             fileS.writeText("walk =  " + infoS.toString())
             infoS.clear()
