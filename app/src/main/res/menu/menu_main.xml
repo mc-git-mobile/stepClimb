@@ -9,4 +9,5 @@
           app:showAsAction="never"/>
     <item android:title="Back" android:id="@+id/back"/>
     <item android:title="Save" android:id="@+id/write"/>
+    <item android:title="Clear" android:id="@+id/clear"/>
 </menu>
