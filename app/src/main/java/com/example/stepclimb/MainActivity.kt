@@ -19,6 +19,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import android.widget.ArrayAdapter
 import java.io.*
 import java.io.File
+import java.lang.Math.abs
 import java.lang.Math.sqrt
 
 
@@ -149,7 +150,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             Log.i("info pyhtag filt size", infoPythagFiltered.size.toString())
             Log.i("info filt event counter", filterEventCounter.toString())
 
-
+            /*
             if ( (infoPythagFiltered[filterEventCounter-1] > infoPythagFiltered[filterEventCounter-2]) && (infoPythagFiltered[filterEventCounter-1] > infoPythagFiltered[filterEventCounter]) ) {
                 if (stepClicked == true) {
                     stepCounter +=1
@@ -158,7 +159,21 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 if (climbClicked == true) {
                     climbCounter += 1
                 }
+            }*/
+
+            if ( (infoPythagFiltered[filterEventCounter-1] - infoPythagFiltered[filterEventCounter]) > abs(1)  && (infoPythagFiltered[filterEventCounter-1] - infoPythagFiltered[filterEventCounter]) < abs(4) ) {
+                if (stepClicked == true) {
+                    stepCounter +=1
+                }
+
+                if (climbClicked == true) {
+                    climbCounter += 1
+                }
             }
+
+
+
+
         }
 
 
@@ -230,7 +245,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         //list view that is opened from the action bar
         listView = findViewById(R.id.list)
         arrayAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1)
-        listView?.adapter = arrayAdapter
+        listView?.adapter = arrayAdapter as ArrayAdapter<String>
 
 
 
@@ -248,7 +263,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     climbClicked = false
                 }
                 //val file = File(fileNameStep)
-                sensorMan.registerListener(this, sensorMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_FASTEST)
+                sensorMan.registerListener(this, sensorMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL)
                 //sensorMan.sensor
 
 
@@ -268,7 +283,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 }
 
                 //val file = File(fileNameClimb)
-                sensorMan.registerListener(this, sensorMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_FASTEST)
+                sensorMan.registerListener(this, sensorMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL)
 
             }
             else if (climbClicked == true) {
