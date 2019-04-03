@@ -141,7 +141,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
         // just testing a method to see if i could only count peaks but peaks don't represent steps
         if (infoPythagFiltered.size > 3) {
-
+/*
             if ( (infoPythagFiltered[filterEventCounter-1] > infoPythagFiltered[filterEventCounter-2]) && (infoPythagFiltered[filterEventCounter-1] > infoPythagFiltered[filterEventCounter]) && (infoPythagFiltered[filterEventCounter-1] > 10.5) ) {
                 if (stepClicked == true) {
                     stepCounter +=1
@@ -158,7 +158,21 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     Log.i ("info climb counter", climbCounter.toString())
 
                 }
+            }*/
+            
+            if ( (infoPythagFiltered[filterEventCounter-1] - infoPythagFiltered[filterEventCounter]) > abs(1)  && (infoPythagFiltered[filterEventCounter-1] - infoPythagFiltered[filterEventCounter]) < abs(4) ) {
+                if (stepClicked == true) {
+                    stepCounter +=1
+                }
+
+                if (climbClicked == true) {
+                    climbCounter += 1
+                }
             }
+
+            
+            
+            
         }
 
 
