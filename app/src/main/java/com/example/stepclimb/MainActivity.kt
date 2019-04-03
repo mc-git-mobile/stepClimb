@@ -138,25 +138,25 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         */
 
 
-        Log.i("info pyhtag filt", infoPythagFiltered.toString())
-        Log.i("info pyhtag filt size", infoPythagFiltered.size.toString())
-        Log.i("info filt event counter", filterEventCounter.toString())
-
 
         // just testing a method to see if i could only count peaks but peaks don't represent steps
         if (infoPythagFiltered.size > 3) {
-            Log.i("info pyhtag filt", infoPythagFiltered.toString())
-            Log.i("info pyhtag filt size", infoPythagFiltered.size.toString())
-            Log.i("info filt event counter", filterEventCounter.toString())
 
-
-            if ( (infoPythagFiltered[filterEventCounter-1] > infoPythagFiltered[filterEventCounter-2]) && (infoPythagFiltered[filterEventCounter-1] > infoPythagFiltered[filterEventCounter]) ) {
+            if ( (infoPythagFiltered[filterEventCounter-1] > infoPythagFiltered[filterEventCounter-2]) && (infoPythagFiltered[filterEventCounter-1] > infoPythagFiltered[filterEventCounter]) && (infoPythagFiltered[filterEventCounter-1] > 10.5) ) {
                 if (stepClicked == true) {
                     stepCounter +=1
+
+                    Log.i ("info step counter", stepCounter.toString())
+                    Log.i ("info step pF -1", infoPythagFiltered[filterEventCounter-1].toString())
+                    Log.i ("info step pF -2", infoPythagFiltered[filterEventCounter-2].toString())
+                    Log.i ("info step pF", infoPythagFiltered[filterEventCounter-0].toString())
+
                 }
 
                 if (climbClicked == true) {
                     climbCounter += 1
+                    Log.i ("info climb counter", climbCounter.toString())
+
                 }
             }
         }
@@ -248,7 +248,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     climbClicked = false
                 }
                 //val file = File(fileNameStep)
-                sensorMan.registerListener(this, sensorMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_FASTEST)
+                sensorMan.registerListener(this, sensorMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL)
                 //sensorMan.sensor
 
 
@@ -329,6 +329,17 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             infoPythagFiltered.clear()
 
             filePythagUnfiltered.writeText("Pythagorean Unfiltered Data (X, Y, Z) =  " + infoPythagUnfiltered.toString())
+            infoPythagUnfiltered.clear()
+
+            true
+        }
+
+        R.id.clear -> {
+            //used to save all the arrays to files if the save button is pressed
+
+            infoStep.clear()
+            infoClimb.clear()
+            infoPythagFiltered.clear()
             infoPythagUnfiltered.clear()
 
             true
