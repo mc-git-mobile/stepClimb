@@ -17,6 +17,7 @@ import android.widget.ListView
 import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_main.*
 import android.widget.ArrayAdapter
+import kotlinx.android.synthetic.main.content_main.*
 import java.io.*
 import java.io.File
 import java.lang.Math.sqrt
@@ -29,6 +30,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private var stepClicked = false
     private var climbClicked = false
     var infoX = arrayListOf<Float>()
+    var average:Double = 0.0
+    var count = 0
 
     var sensorEventCounter = 0
     var filterEventCounter = -1
@@ -42,6 +45,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     var stepCounter = 0
     var climbCounter = 0
+    var steps = 0
+    var place = 0
 
 
 
@@ -110,6 +115,18 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 filterEventCounter +=1
 
 
+                if(infoPythagFiltered.size > 2 && infoPythagFiltered[filterEventCounter - 1] > 10) {
+
+                    count++
+                    average =  ( average + infoPythagFiltered[filterEventCounter-1] ) / count
+
+                    if (infoPythagFiltered[filterEventCounter - 1] > average - 1) {
+                        steps++
+                        pedo.text = "Steps: " + steps
+                    }
+                }
+
+
 
                 //  ||                                                         ||
                 //  \/  counters not being used probably useless all together  \/
@@ -142,6 +159,14 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         Log.i("info pyhtag filt size", infoPythagFiltered.size.toString())
         Log.i("info filt event counter", filterEventCounter.toString())
 
+        //First attempt at pedometer
+
+        //while ( i < infoPythagFiltered.size ){
+
+
+            //place++
+        //}
+
 
         // just testing a method to see if i could only count peaks but peaks don't represent steps
         if (infoPythagFiltered.size > 3) {
@@ -172,13 +197,13 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }*/
 
 
-        if (stepClicked == true) {
-            stepView.setText(stepCounter.toString())
-        }
+       // if (stepClicked == true) {
+         //   stepView.setText(stepCounter.toString())
+        //}
 
-        if (climbClicked == true) {
-            climbView.setText(climbCounter.toString())
-        }
+        //if (climbClicked == true) {
+          //  climbView.setText(climbCounter.toString())
+        //}
 
 
         sensorEventCounter +=1 // increment counter every time sensor event happens
@@ -244,11 +269,13 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
             if (stepClicked == false) {
                 stepClicked = true
+                step.text = "Stop Walking"
                 if(climbClicked == true) {
                     climbClicked = false
+                    climb.text = "Start Climbing"
                 }
                 //val file = File(fileNameStep)
-                sensorMan.registerListener(this, sensorMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_FASTEST)
+                sensorMan.registerListener(this, sensorMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL)
                 //sensorMan.sensor
 
 
@@ -256,6 +283,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             else if (stepClicked == true) {
                 stepClicked = false
                 sensorMan.unregisterListener(this)
+                step.text = "Start Walking"
             }
 
         }
@@ -263,17 +291,20 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         climb.setOnClickListener {
             if (climbClicked == false) {
                 climbClicked = true
+                climb.text = "Stop Climbing"
                 if(stepClicked == true) {
                     stepClicked = false
+                    step.text = "Start Walking"
                 }
 
                 //val file = File(fileNameClimb)
-                sensorMan.registerListener(this, sensorMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_FASTEST)
+                sensorMan.registerListener(this, sensorMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL)
 
             }
             else if (climbClicked == true) {
                 climbClicked = false
                 sensorMan.unregisterListener(this)
+                climb.text = "Start Climbing"
             }
 
         }
@@ -317,20 +348,23 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
 
         R.id.write -> {
-            //used to save all the arrays to files if the save button is pressed
+            try {
+                //used to save all the arrays to files if the save button is pressed
 
-            fileStep.writeText("walk =  " + infoStep.toString())
-            infoStep.clear()
+                fileStep.writeText("walk =  " + infoStep.toString())
+                infoStep.clear()
 
-            fileClimb.writeText("climb =  " + infoClimb.toString())
-            infoClimb.clear()
+                fileClimb.writeText("climb =  " + infoClimb.toString())
+                infoClimb.clear()
 
-            filePythag.writeText("Pythagorean Filtered Data (X,Y,Z) =  " + infoPythagFiltered.toString())
-            infoPythagFiltered.clear()
+                filePythag.writeText("Pythagorean Filtered Data (X,Y,Z) =  " + infoPythagFiltered.toString())
+                infoPythagFiltered.clear()
 
-            filePythagUnfiltered.writeText("Pythagorean Unfiltered Data (X, Y, Z) =  " + infoPythagUnfiltered.toString())
-            infoPythagUnfiltered.clear()
+                filePythagUnfiltered.writeText("Pythagorean Unfiltered Data (X, Y, Z) =  " + infoPythagUnfiltered.toString())
+                infoPythagUnfiltered.clear()
 
+
+            }catch(e:IOException){Log.i("Info", "This skipped the save")}
             true
         }
 
