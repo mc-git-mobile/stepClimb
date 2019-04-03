@@ -113,6 +113,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 infoPythagFiltered.add(infoPythagUnfiltered[sensorEventCounter-1])
                 menuList.add(infoPythagUnfiltered[sensorEventCounter-1].toString())
                 arrayAdapter?.notifyDataSetChanged()
+
+               // if (infoPythagFiltered[])
                 filterEventCounter +=1
 
 
@@ -362,7 +364,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             true
         }
 
-        R.id.delete -> {
+        R.id.clear -> {
             //used to save all the arrays to files if the save button is pressed
 
             var text1:TextView = findViewById(R.id.text1)
