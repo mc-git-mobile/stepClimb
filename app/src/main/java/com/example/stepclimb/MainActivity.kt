@@ -19,6 +19,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import android.widget.ArrayAdapter
 import java.io.*
 import java.io.File
+import java.lang.Math.abs
 import java.lang.Math.sqrt
 
 
@@ -42,6 +43,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     var stepCounter = 0
     var climbCounter = 0
+
+    var menuList = arrayListOf<String>()
+
 
 
 
@@ -107,6 +111,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
             if ( (infoPythagUnfiltered[sensorEventCounter-1] > infoPythagUnfiltered[sensorEventCounter-2]) && (infoPythagUnfiltered[sensorEventCounter-1] > infoPythagUnfiltered[sensorEventCounter]) ) {
                 infoPythagFiltered.add(infoPythagUnfiltered[sensorEventCounter-1])
+                menuList.add(infoPythagUnfiltered[sensorEventCounter-1].toString())
+                arrayAdapter?.notifyDataSetChanged()
                 filterEventCounter +=1
 
 
@@ -118,6 +124,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             }
             if ( (infoPythagUnfiltered[sensorEventCounter-1] < infoPythagUnfiltered[sensorEventCounter-2]) && (infoPythagUnfiltered[sensorEventCounter-1] < infoPythagUnfiltered[sensorEventCounter]) ) {
                 infoPythagFiltered.add(infoPythagUnfiltered[sensorEventCounter-1])
+                menuList.add(infoPythagUnfiltered[sensorEventCounter-1].toString())
+                arrayAdapter?.notifyDataSetChanged()
+
                 filterEventCounter +=1
 
 
@@ -160,7 +169,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 }
             }*/
             
-            if ( (infoPythagFiltered[filterEventCounter-1] - infoPythagFiltered[filterEventCounter]) > abs(1)  && (infoPythagFiltered[filterEventCounter-1] - infoPythagFiltered[filterEventCounter]) < abs(4) ) {
+            if ( (infoPythagFiltered[filterEventCounter-1] - infoPythagFiltered[filterEventCounter]) > abs(1.5)  && (infoPythagFiltered[filterEventCounter-1] - infoPythagFiltered[filterEventCounter]) < abs(4) ) {
                 if (stepClicked == true) {
                     stepCounter +=1
                 }
@@ -243,8 +252,13 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
         //list view that is opened from the action bar
         listView = findViewById(R.id.list)
-        arrayAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1)
+        //arrayAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1)
+        //listView?.adapter = arrayAdapter
+
+        arrayAdapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, menuList)
+
         listView?.adapter = arrayAdapter
+
 
 
 
@@ -282,7 +296,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 }
 
                 //val file = File(fileNameClimb)
-                sensorMan.registerListener(this, sensorMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_FASTEST)
+                sensorMan.registerListener(this, sensorMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL)
 
             }
             else if (climbClicked == true) {
@@ -348,10 +362,23 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             true
         }
 
-        R.id.clear -> {
+        R.id.delete -> {
             //used to save all the arrays to files if the save button is pressed
 
+            var text1:TextView = findViewById(R.id.text1)
+            var stepView:TextView = findViewById(R.id.stepCount)
+            var climbView:TextView = findViewById(R.id.climbCount)
+
+            stepView.text = "step"
+            climbView.text = "climb"
+            text1.text = "Get Ready!"
             infoStep.clear()
+            sensorEventCounter = 0
+            filterEventCounter = -1
+            menuList.clear()
+            arrayAdapter?.notifyDataSetChanged()
+
+
             infoClimb.clear()
             infoPythagFiltered.clear()
             infoPythagUnfiltered.clear()
