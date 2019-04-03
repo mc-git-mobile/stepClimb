@@ -26,198 +26,197 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     lateinit var sensorMan : SensorManager
     private var accel : Sensor ?= null
-    private var stepB = false
-    private var climbB = false
+    private var stepClicked = false
+    private var climbClicked = false
     var infoX = arrayListOf<Float>()
-    var infoZ = arrayListOf<Double>()
 
-    var i = 0
-    var j = 3
-    var h = 2
-    var step = 0
+    var sensorEventCounter = 0
+    var filterEventCounter = -1
+
+
+    // just using these to compare one value to the next but my idea didnt work anyway
+    var counterPost = 3 //counter to get next value
+    var counterPre = 2 // counter to get previous value
+
+    var step = 0 // steps taken
 
     var stepCounter = 0
     var climbCounter = 0
 
 
 
-    var infoS = arrayListOf<String>()
-    var infoC = arrayListOf<String>()
-    var infoD = arrayListOf<String>()
-    var infoN = arrayListOf<Double>()
+    var infoStep = arrayListOf<String>()
+    var infoClimb = arrayListOf<String>()
+    //var infoPythagUnfilteredExtra = arrayListOf<String>()
+    var infoPythagFiltered = arrayListOf<Double>()
+    var infoPythagUnfiltered = arrayListOf<Double>()
+
+    var pU:Double = 0.0
 
 
-    var d:Double = 0.0
-    var c:Double = 0.0
+    var pythagUnfiltered:Double = 0.0
 
 
 
+    private var arrayAdapter: ArrayAdapter<String>? = null // adapter for list view if needed
+    private var listView: ListView? = null // list view for action bar to show data if needed
+
+    private var listSensorData = arrayListOf<String>()  //used to store sensor data will implement eventually
 
 
-    private var arrayAdapter: ArrayAdapter<String>? = null
-    private var listView: ListView? = null
-    private var listSensorData = arrayListOf<String>()  //used to store sensor data
-
-    val fileS = File(Environment.getExternalStoragePublicDirectory(
+    // file to save step data
+    var fileStep = File(Environment.getExternalStoragePublicDirectory(
         Environment.DIRECTORY_DOCUMENTS), "step.txt")
-    val fileC = File(Environment.getExternalStoragePublicDirectory(
+    // file to save climb data
+    var fileClimb = File(Environment.getExternalStoragePublicDirectory(
         Environment.DIRECTORY_DOCUMENTS), "climb.txt")
-    val fileD = File(Environment.getExternalStoragePublicDirectory(
-        Environment.DIRECTORY_DOCUMENTS), "D.txt")
-    val fileN = File(Environment.getExternalStoragePublicDirectory(
-        Environment.DIRECTORY_DOCUMENTS), "N.txt")
-
-
+    // file to save unfiltered pythag data
+    var filePythagUnfiltered = File(Environment.getExternalStoragePublicDirectory(
+        Environment.DIRECTORY_DOCUMENTS), "pythagoreanUnfiltered.txt")
+    // file to save filtered pythag data
+    var filePythag = File(Environment.getExternalStoragePublicDirectory(
+        Environment.DIRECTORY_DOCUMENTS), "pythagoreanFiltered.txt")
 
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
     }
-
 
     override fun onSensorChanged(event: SensorEvent?) {
 
         var text1:TextView = findViewById(R.id.text1)
         //var text2:TextView = findViewById(R.id.text1)
 
-        var stepBox:TextView = findViewById(R.id.stepCount)
-        var climbBox:TextView = findViewById(R.id.climbCount)
+        var stepView:TextView = findViewById(R.id.stepCount)
+        var climbView:TextView = findViewById(R.id.climbCount)
 
 
-        infoX.add(event!!.values[1])
+        infoX.add(event!!.values[1]) // adding just y data to and array on each sensor event to test a counting method
 
-        c = (event.values[0].toDouble()*event.values[0].toDouble())+(event.values[1].toDouble()*event.values[1].toDouble())+(event.values[2].toDouble()*event.values[2].toDouble())
+        // combine axis using pythagorean theorem
+        pU = (event.values[0].toDouble()*event.values[0].toDouble())+(event.values[1].toDouble()*event.values[1].toDouble())+(event.values[2].toDouble()*event.values[2].toDouble())
+        pythagUnfiltered = sqrt(pU)  //getting combination of all axis
 
-        d = sqrt(c)
+        // adding pythag data to unfiltered array
+        infoPythagUnfiltered.add(pythagUnfiltered)
 
-        infoZ.add(d)
 
-        //infoD.add(d.toString())
 
-        if (infoZ.size > 3) {
 
-            if ( (infoZ[i-1] > infoZ[i-2]) && (infoZ[i-1] > infoZ[i]) ) {
-                infoN.add(infoZ[i-1])
-                h++
-                j++
+        // filtering pythagorean data to show only peaks and valleys
+        if (infoPythagUnfiltered.size > 3) {
 
+            if ( (infoPythagUnfiltered[sensorEventCounter-1] > infoPythagUnfiltered[sensorEventCounter-2]) && (infoPythagUnfiltered[sensorEventCounter-1] > infoPythagUnfiltered[sensorEventCounter]) ) {
+                infoPythagFiltered.add(infoPythagUnfiltered[sensorEventCounter-1])
+                filterEventCounter +=1
+
+
+
+                //  ||                                                         ||
+                //  \/  counters not being used probably useless all together  \/
+                //counterPre++
+                //counterPost++
             }
-            if ( (infoZ[i-1] < infoZ[i-2]) && (infoZ[i-1] < infoZ[i]) ) {
-                infoN.add(infoZ[i-1])
-                h++
-                j++
+            if ( (infoPythagUnfiltered[sensorEventCounter-1] < infoPythagUnfiltered[sensorEventCounter-2]) && (infoPythagUnfiltered[sensorEventCounter-1] < infoPythagUnfiltered[sensorEventCounter]) ) {
+                infoPythagFiltered.add(infoPythagUnfiltered[sensorEventCounter-1])
+                filterEventCounter +=1
+
+
+                //  ||                                                         ||
+                //  \/  counters not being used probably useless all together  \/
+                //counterPre++
+                //counterPost++
             }
-
-            Log.i("infoN ", infoN.toString())
-
-
         }
-        //Log.i("infoN", infoN[i].toString())
-        Log.i("infoN size", infoN.size.toString())
-        Log.i("j", j.toString())
 
-
-        if (infoN.size > j){
-            if ((infoN[j] - infoN[h]) > 0.05 /*|| (infoN[h] - infoN[j]) < (- 0.05)*/ ){
-
+        /*
+        if (infoPythag.size > j){
+            if ((infoPythag[j] - infoPythag[h]) > 0.05 /*|| (infoN[h] - infoN[j]) < (- 0.05)*/ ){
                 step ++
-                Log.i("info n h", infoN[h].toString())
-                Log.i("info n j", infoN[j].toString())
-                Log.i("info n h- j", (infoN[h]- infoN[j]).toString())
-                //climbBox.setText((infoN[h]- infoN[j]).toString())
-
-
-                //h++
-                //j++
-                //Log.i("info n h", infoN[h].toString())
-                //Log.i("info n j", infoN[j].toString())
-                //stepBox.setText((infoN[h]- infoN[j]).toString())
-
-
             }
         }
-
-        stepBox.setText(step.toString())
-        //Log.i("info n h", infoN[h].toString())
-        //Log.i("info n j", infoN[j].toString())
+        stepView.setText(step.toString()) // set step view to step counter
+        */
 
 
-        Log.i("step count", step.toString())
+        Log.i("info pyhtag filt", infoPythagFiltered.toString())
+        Log.i("info pyhtag filt size", infoPythagFiltered.size.toString())
+        Log.i("info filt event counter", filterEventCounter.toString())
 
 
+        // just testing a method to see if i could only count peaks but peaks don't represent steps
+        if (infoPythagFiltered.size > 3) {
+            Log.i("info pyhtag filt", infoPythagFiltered.toString())
+            Log.i("info pyhtag filt size", infoPythagFiltered.size.toString())
+            Log.i("info filt event counter", filterEventCounter.toString())
 
-        if (infoD.size > 3) {
 
-            if ( (infoD[i-1] > infoD[i-2]) && (infoD[i-1] > infoD[i]) ) {
-                if (stepB == true) {
+            if ( (infoPythagFiltered[filterEventCounter-1] > infoPythagFiltered[filterEventCounter-2]) && (infoPythagFiltered[filterEventCounter-1] > infoPythagFiltered[filterEventCounter]) ) {
+                if (stepClicked == true) {
                     stepCounter +=1
                 }
 
-                if (climbB == true) {
+                if (climbClicked == true) {
                     climbCounter += 1
                 }
             }
         }
 
 
-
+        /*
         if (infoX.size > 3) {
-
             if ( (infoX[i-1] > infoX[i-2]) && (infoX[i-1] > infoX[i]) ) {
                 //stepCounter +=1
                 //climbCounter += 1
-
                 // stepBox.setText(stepCounter)
             }
+        }*/
+
+
+        if (stepClicked == true) {
+            stepView.setText(stepCounter.toString())
         }
 
-        if (stepB == true) {
-            //stepBox.setText(stepCounter.toString())
-        }
-
-        if (climbB == true) {
-            //climbBox.setText(climbCounter.toString())
+        if (climbClicked == true) {
+            climbView.setText(climbCounter.toString())
         }
 
 
-        //stepBox.setText(stepCounter.toString())
+        sensorEventCounter +=1 // increment counter every time sensor event happens
+        //filterEventCounter +=1
 
-        i +=1
 
+
+        // displaying current axis data in text main text field
         text1.text = "x = ${event!!.values[0]}\n\n" +
                     "y = ${event.values[1]}\n\n" +
                     "z = ${event.values[2]}\n\n"
 
 
+        // array to store steps adding event values to is if step button is pressed
+        if (stepClicked == true) {
+            infoStep.add(" x = ${event!!.values[0]}, " +
+                         " y = ${event.values[1]}, " +
+                         " z = ${event.values[2]}  +")
+        }
+        // array to store stair steps adding event values to is if climb button is pressed
+        if (climbClicked == true) {
+            infoClimb.add(" x = ${event!!.values[0]}, " +
+                          " y = ${event.values[1]}, " +
+                          " z = ${event.values[2]}  +")
+        } //  Not being used right now
 
+        /*
         if (stepB == true) {
-            infoS.add(" x = ${event!!.values[0]}, " +
+            infoStep.add(" x = ${event!!.values[0]}, " +
                     " y = ${event.values[1]}, " +
                     " z = ${event.values[2]}  +")
         }
 
         if (climbB == true) {
-            infoC.add(" x = ${event!!.values[0]}, " +
-                    " y = ${event.values[1]}, " +
-                    " z = ${event.values[2]}  +")
-        }
-
-
-
-
-
-        if (stepB == true) {
-            infoS.add(" x = ${event!!.values[0]}, " +
-                    " y = ${event.values[1]}, " +
-                    " z = ${event.values[2]}  +")
-
-
-        }
-        if (climbB == true) {
-            infoC.add(" x = ${event!!.values[0]}, " +
-                    " y = ${event.values[1]}, " +
-                    " z = ${event.values[2]}  +")
-
-        }
+            infoClimb.add(" x = ${event!!.values[0]}, " +
+                            " y = ${event.values[1]}, " +
+                        " z = ${event.values[2]}  +")
+        }*/
 
     }
 
@@ -228,6 +227,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
+        //list view that is opened from the action bar
         listView = findViewById(R.id.list)
         arrayAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1)
         listView?.adapter = arrayAdapter
@@ -237,42 +237,42 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         var step: Button = findViewById(R.id.step)
         var climb: Button = findViewById(R.id.climb)
 
-        sensorMan = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        sensorMan = getSystemService(Context.SENSOR_SERVICE) as SensorManager  // sensor manager
 
-
+        // on click listener that sets boolean value C
         step.setOnClickListener {
 
-            if (stepB == false) {
-                stepB = true
-                if(climbB == true) {
-                    climbB = false
+            if (stepClicked == false) {
+                stepClicked = true
+                if(climbClicked == true) {
+                    climbClicked = false
                 }
                 //val file = File(fileNameStep)
-                sensorMan.registerListener(this, sensorMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL, SensorManager.SENSOR_STATUS_ACCURACY_HIGH)
+                sensorMan.registerListener(this, sensorMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_FASTEST)
                 //sensorMan.sensor
 
 
             }
-            else if (stepB == true) {
-                stepB = false
+            else if (stepClicked == true) {
+                stepClicked = false
                 sensorMan.unregisterListener(this)
             }
 
         }
         //turn onb sensor when climbing button is pressed
         climb.setOnClickListener {
-            if (climbB == false) {
-                climbB = true
-                if(stepB == true) {
-                    stepB = false
+            if (climbClicked == false) {
+                climbClicked = true
+                if(stepClicked == true) {
+                    stepClicked = false
                 }
 
                 //val file = File(fileNameClimb)
-                sensorMan.registerListener(this, sensorMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL, SensorManager.SENSOR_STATUS_ACCURACY_HIGH)
+                sensorMan.registerListener(this, sensorMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_FASTEST)
 
             }
-            else if (climbB == true) {
-                climbB = false
+            else if (climbClicked == true) {
+                climbClicked = false
                 sensorMan.unregisterListener(this)
             }
 
@@ -292,7 +292,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     }
 
     override fun onOptionsItemSelected(item: MenuItem)= when(item.itemId){
+
         R.id.view -> {
+            //view button is to just view the list of sensor data but it is not implemented yet
+
             var textD:TextView = findViewById(R.id.text1)
             textD.visibility = View.INVISIBLE
 
@@ -310,28 +313,29 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             var data:ListView = findViewById(R.id.list)
             data.visibility = View.VISIBLE
 
-
             true
         }
 
         R.id.write -> {
+            //used to save all the arrays to files if the save button is pressed
 
-            fileS.writeText("walk =  " + infoS.toString())
-            infoS.clear()
+            fileStep.writeText("walk =  " + infoStep.toString())
+            infoStep.clear()
 
-            fileC.writeText("climb =  " + infoC.toString())
-            infoC.clear()
+            fileClimb.writeText("climb =  " + infoClimb.toString())
+            infoClimb.clear()
 
-            fileD.writeText("D =  " + infoD.toString())
-            infoD.clear()
+            filePythag.writeText("Pythagorean Filtered Data (X,Y,Z) =  " + infoPythagFiltered.toString())
+            infoPythagFiltered.clear()
 
-            fileN.writeText("N =  " + infoN.toString())
-            infoN.clear()
+            filePythagUnfiltered.writeText("Pythagorean Unfiltered Data (X, Y, Z) =  " + infoPythagUnfiltered.toString())
+            infoPythagUnfiltered.clear()
 
             true
         }
 
         R.id.back -> {
+            // sets list to invisible and goes back to original state
             var textD:TextView = findViewById(R.id.text1)
             textD.visibility = View.VISIBLE
             var textC:TextView = findViewById(R.id.climbCount)
@@ -348,9 +352,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             var data:ListView = findViewById(R.id.list)
             data.visibility = View.INVISIBLE
 
-
-
-
             true
         }
 
@@ -360,16 +361,17 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     }
 
-
+    // stops sensor and changes booleans when ap paused
     override fun onPause() {
         super.onPause()
-        stepB = false
-        climbB = false
+        stepClicked = false
+        climbClicked = false
         sensorMan?.unregisterListener(this)
     } // end on pause
 
+    // turns sensor back on on resume but removed because i want the sensor to start only when button is pressed
     override fun onResume() {
         super.onResume()
-        sensorMan?.registerListener(this, accel, SensorManager.SENSOR_DELAY_NORMAL)
+        //sensorMan?.registerListener(this, accel, SensorManager.SENSOR_DELAY_NORMAL)
     } // end on resume
 } //end class
