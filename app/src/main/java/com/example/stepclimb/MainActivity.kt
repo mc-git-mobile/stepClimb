@@ -115,7 +115,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 filterEventCounter +=1
 
 
-                if(infoPythagFiltered.size > 2 && infoPythagFiltered[filterEventCounter - 1] > 10) {
+                if(infoPythagFiltered.size > 2 && infoPythagFiltered[filterEventCounter - 1] > 10.5) {
 
                     count++
                     average =  ( average + infoPythagFiltered[filterEventCounter-1] ) / count
