@@ -6,7 +6,15 @@
     <item android:id="@+id/view"
           android:title="View Data"
           android:orderInCategory="100"
-          app:showAsAction="never"/>
+          app:showAsAction="never">
+        <menu
+        >
+            <item android:title="Raw Data" android:id="@+id/rawStep"/>
+            <item android:title="Raw Climb Data" android:id="@+id/rawClimb"/>
+            <item android:title="Averages" android:id="@+id/averages"/>
+            <item android:title="Max Min" android:id="@+id/maxMin"/>
+        </menu>
+    </item>
     <item android:title="Back" android:id="@+id/back"/>
     <item android:title="Save" android:id="@+id/write"/>
     <item android:title="Clear" android:id="@+id/clear"/>

@@ -17,6 +17,7 @@ import android.widget.ListView
 import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_main.*
 import android.widget.ArrayAdapter
+import kotlinx.android.synthetic.main.content_main.*
 import java.io.*
 import java.io.File
 import java.lang.Math.abs
@@ -29,51 +30,75 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private var accel : Sensor ?= null
     private var stepClicked = false
     private var climbClicked = false
-    var infoX = arrayListOf<Float>()
 
     var sensorEventCounter = 0
     var filterEventCounter = -1
 
-    var totVect = arrayListOf<Double>()
-    var totAve = arrayListOf<Double>()
+    var totVectStep = arrayListOf<Double>()
+    var totVectClimb = arrayListOf<Double>()
+
+    var totAveStep = arrayListOf<Double>()
+    var totAveClimb = arrayListOf<Double>()
+
 
     var xVal = arrayListOf<Double>()
     var yVal = arrayListOf<Double>()
     var zVal = arrayListOf<Double>()
 
+    var aveVis = false
+    var minMaxVis = false
+    var listStepVis = false
+    var listClimbVis = false
+
+
+
     var xAve:Double = 0.0
     var yAve:Double = 0.0
     var zAve:Double = 0.0
 
-    var threshHold = 10.5
+    var threshHoldStep = 10.3
+    var threshHoldClimb = 11.3
+
 
     var flag = 0
 
-    var index = 0
-    var steps = 0
+    var indexS = 0
+    var indexC = 0
+    //var index = 0
 
 
-    // just using these to compare one value to the next but my idea didnt work anyway
-    var counterPost = 3 //counter to get next value
-    var counterPre = 2 // counter to get previous value
 
-    var step = 0 // steps taken
 
     var stepCounter = 0
     var climbCounter = 0
 
-    var menuList = arrayListOf<String>()
+    var menuRawStep = arrayListOf<String>()
+    var menuRawClimb = arrayListOf<String>()
 
 
+    var menuAvg = arrayListOf<String>()
+
+    var menuMaxMin = arrayListOf<String>()
 
 
     var infoStep = arrayListOf<String>()
     var infoClimb = arrayListOf<String>()
     //var infoPythagUnfilteredExtra = arrayListOf<String>()
+
     var infoPythagFiltered = arrayListOf<Double>()
     var infoPythagUnfiltered = arrayListOf<Double>()
 
-    var pU:Double = 0.0
+    var vector = 0.0
+
+    var climbAvg = 0.0
+    var stepAvg = 0.0
+
+    var stepMin = 0.0
+    var climbMin = 0.0
+
+    var stepMax = 0.0
+    var climbMax = 0.0
+
 
 
     var pythagUnfiltered:Double = 0.0
@@ -81,9 +106,18 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
 
     private var arrayAdapter: ArrayAdapter<String>? = null // adapter for list view if needed
-    private var listView: ListView? = null // list view for action bar to show data if needed
+    private var arrayAdapterClimb: ArrayAdapter<String>? = null // adapter for list view if needed
 
-    private var listSensorData = arrayListOf<String>()  //used to store sensor data will implement eventually
+    private var arrayAdapterAve: ArrayAdapter<String>? = null // adapter for list view if needed
+    private var arrayAdapterMinMax: ArrayAdapter<String>? = null // adapter for list view if needed
+
+    private var listView: ListView? = null // list view for action bar to show data if needed
+    private var listViewClimb: ListView? = null // list view for action bar to show data if needed
+
+    private var listViewAvg: ListView? = null // list view for action bar to show data if needed
+    private var listViewMinMax: ListView? = null // list view for action bar to show data if needed
+
+
 
 
     // file to save step data
@@ -105,8 +139,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onSensorChanged(event: SensorEvent?) {
 
-        var text1:TextView = findViewById(R.id.text1)
-        //var text2:TextView = findViewById(R.id.text1)
+        var dataView:TextView = findViewById(R.id.text1)
 
         var stepView:TextView = findViewById(R.id.stepCount)
         var climbView:TextView = findViewById(R.id.climbCount)
@@ -121,143 +154,101 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         // adding pythag data to unfiltered array
         //infoPythagUnfiltered.add(pythagUnfiltered)
 
+
+        dataView.text = "x = ${event!!.values[0]}\n\n" +
+                        "y = ${event.values[1]}\n\n" +
+                        "z = ${event.values[2]}\n\n"
+
+
         xVal.add(event!!.values[0].toDouble())
         yVal.add(event.values[1].toDouble())
         zVal.add(event.values[2].toDouble())
 
-        //totVect.add() = sqrt(  ( (xVal[index] - xAve)*(xVal[index] - xAve).toFloat() )  )
-        totVect.add(sqrt(((xVal[index]-xAve)* (xVal[index]-xAve))+ ((yVal[index] - yAve)*(yVal[index] - yAve)) + ((zVal[index] - zAve)*(zVal[index] - zAve))))
+        vector = (sqrt(((xVal[index]-xAve)* (xVal[index]-xAve))+ ((yVal[index] - yAve)*(yVal[index] - yAve)) + ((zVal[index] - zAve)*(zVal[index] - zAve))))
+        //Log.i("info vector", vector.toString())
 
-        if (index>1) {
+        //totVect.add(sqrt(((xVal[index]-xAve)* (xVal[index]-xAve))+ ((yVal[index] - yAve)*(yVal[index] - yAve)) + ((zVal[index] - zAve)*(zVal[index] - zAve))))
+        if (stepClicked == true)
+            totVectStep.add(vector)
+
+            menuRawStep.add(totVectStep[index].toString())
+            arrayAdapter?.notifyDataSetChanged()
+
+        if (climbClicked == true)
+            totVectClimb.add(vector)
+
+            menuRawClimb.add(totVectStep[index].toString())
+            arrayAdapterClimb?.notifyDataSetChanged()
+
+
+
+
+        //menuRawStep.add(totVectStep[index].toString())
+        //arrayAdapter?.notifyDataSetChanged()
+
+        //menuAvg.add(index.toString())
+        //arrayAdapterAve?.notifyDataSetChanged()
+
+        menuMaxMin.add(index.toString())
+        arrayAdapterMinMax?.notifyDataSetChanged()
+
+
+
+        if (index>1 && stepClicked == true) {
+            totAveStep.add(((totVectStep[index] + totVectStep[index - 1]) / 2))
+            stepAvg = totAveStep[totAveStep.size-1]
+        }
+
+        if (index>1 && climbClicked == true) {
+            totAveClimb.add(((totVectClimb[index] + totVectClimb[index - 1]) / 2))
+            stepAvg = totAveStep[totAveStep.size-1]
+        }
+
+        /*
+        if (index>1 && climbClicked == true) {
             totAve.add(((totVect[index] + totVect[index - 1]) / 2))
+            if (stepClicked == true) {
+                stepAvg = totAve[totAve.size-1]
+            }
+            if (climbClicked == true) {
+                climbAvg = totAve[totAve.size-1]
+            }
+        }*/
+
+
+
+        if (index > 1) {
+
+            if(totAveStep[index-2] > threshHoldStep && flag == 0) {
+                stepCounter ++
+                flag = 1
+
+            }
+            else if (totAveStep[index-2] > threshHoldStep && flag == 1) { }
+
+            if (totAveStep[index-2] < threshHoldStep && flag == 1) {
+                flag = 0
+            }
         }
 
         if (index > 1) {
 
-            if(totAve[index-2] > threshHold && flag == 0) {
-                steps ++
+            if(totAveClimb[index-2] > threshHoldClimb && flag == 0) {
+                stepCounter ++
                 flag = 1
 
-                //stepView.setText(steps)
             }
-            else if (totAve[index-2] > threshHold && flag == 1) {
+            else if (totAveClimb[index-2] > threshHoldClimb && flag == 1) { }
 
-            }
-
-            if (totAve[index-2] < threshHold && flag == 1) {
+            if (totAveClimb[index-2] < threshHoldClimb && flag == 1) {
                 flag = 0
             }
-
-        }
-        stepView.setText(steps.toString())
-
-/*
-        if(index>0 && totAve[index] > threshHold && flag == 0) {
-            steps ++
-            flag = 1
-
-            stepView.setText(steps)
-        }
-        else if (index>0 && totAve[index] > threshHold && flag == 1) {
-
         }
 
-        if (index>0 && totAve[index] < threshHold && flag == 1) {
-            flag = 0
-        }*/
+        stepView.setText(stepCounter.toString())
+
+
         index ++
-
-
-
-
-
-        /*
-        // filtering pythagorean data to show only peaks and valleys
-        if (infoPythagUnfiltered.size > 3) {
-
-
-
-            if ( (infoPythagUnfiltered[sensorEventCounter-1] > infoPythagUnfiltered[sensorEventCounter-2]) && (infoPythagUnfiltered[sensorEventCounter-1] > infoPythagUnfiltered[sensorEventCounter]) ) {
-                infoPythagFiltered.add(infoPythagUnfiltered[sensorEventCounter-1])
-                menuList.add(infoPythagUnfiltered[sensorEventCounter-1].toString())
-                arrayAdapter?.notifyDataSetChanged()
-
-               // if (infoPythagFiltered[])
-                filterEventCounter +=1
-
-                //  ||                                                         ||
-                //  \/  counters not being used probably useless all together  \/
-                //counterPre++
-                //counterPost++
-            }
-            if ( (infoPythagUnfiltered[sensorEventCounter-1] < infoPythagUnfiltered[sensorEventCounter-2]) && (infoPythagUnfiltered[sensorEventCounter-1] < infoPythagUnfiltered[sensorEventCounter]) ) {
-                infoPythagFiltered.add(infoPythagUnfiltered[sensorEventCounter-1])
-                menuList.add(infoPythagUnfiltered[sensorEventCounter-1].toString())
-                arrayAdapter?.notifyDataSetChanged()
-
-                filterEventCounter +=1
-
-                //  ||                                                         ||
-                //  \/  counters not being used probably useless all together  \/
-                //counterPre++
-                //counterPost++
-            }
-        }
-
-
-        // just testing a method to see if i could only count peaks but peaks don't represent steps
-        if (infoPythagFiltered.size > 3) {
-
-
-            
-            if ( (infoPythagFiltered[filterEventCounter-1] - infoPythagFiltered[filterEventCounter]) > abs(1.5)  && (infoPythagFiltered[filterEventCounter-1] - infoPythagFiltered[filterEventCounter]) < abs(4) ) {
-                if (stepClicked == true) {
-                    stepCounter +=1
-                }
-
-                if (climbClicked == true) {
-                    climbCounter += 1
-                }
-            }
-            
-        }
-
-
-
-
-        if (stepClicked == true) {
-            stepView.setText(stepCounter.toString())
-        }
-
-        if (climbClicked == true) {
-            climbView.setText(climbCounter.toString())
-        }
-
-
-        sensorEventCounter +=1 // increment counter every time sensor event happens
-        //filterEventCounter +=1
-
-
-
-        // displaying current axis data in text main text field
-        text1.text = "x = ${event!!.values[0]}\n\n" +
-                    "y = ${event.values[1]}\n\n" +
-                    "z = ${event.values[2]}\n\n"
-
-
-        // array to store steps adding event values to is if step button is pressed
-        if (stepClicked == true) {
-            infoStep.add(" x = ${event!!.values[0]}, " +
-                         " y = ${event.values[1]}, " +
-                         " z = ${event.values[2]}  +")
-        }
-        // array to store stair steps adding event values to is if climb button is pressed
-        if (climbClicked == true) {
-            infoClimb.add(" x = ${event!!.values[0]}, " +
-                          " y = ${event.values[1]}, " +
-                          " z = ${event.values[2]}  +")
-        } //  Not being used right now
-        */
 
     }
 
@@ -268,14 +259,25 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
-        //list view that is opened from the action bar
-        listView = findViewById(R.id.list)
-        //arrayAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1)
-        //listView?.adapter = arrayAdapter
 
-        arrayAdapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, menuList)
+        listView = findViewById(R.id.listStep)
+        listView = findViewById(R.id.listClimb)
+
+        listViewAvg = findViewById(R.id.ave)
+        listViewMinMax = findViewById(R.id.minMax)
+
+
+        arrayAdapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, menuRawStep)
+        arrayAdapterClimb = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, menuRawClimb)
+
+        arrayAdapterAve = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, menuAvg)
+        arrayAdapterMinMax = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, menuMaxMin)
+
 
         listView?.adapter = arrayAdapter
+        listViewAvg?.adapter = arrayAdapterAve
+        listViewMinMax?.adapter = arrayAdapterMinMax
+
 
 
 
@@ -285,7 +287,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
         sensorMan = getSystemService(Context.SENSOR_SERVICE) as SensorManager  // sensor manager
 
-        // on click listener that sets boolean value C
         step.setOnClickListener {
 
             if (stepClicked == false) {
@@ -323,24 +324,31 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             }
 
         }
-        //On create
 
-
-
-
-
-        //on create
     }
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_main, menu)
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem)= when(item.itemId){
 
-        R.id.view -> {
-            //view button is to just view the list of sensor data but it is not implemented yet
+        R.id.maxMin -> {
+
+            var dataS:ListView = findViewById(R.id.listStep)
+            var dataC:ListView = findViewById(R.id.listClimb)
+
+            var dataAve:ListView = findViewById(R.id.ave)
+
+            if (listStepVis == true || aveVis == true || listClimbVis == true) {
+                listStepVis = false
+                listClimbVis = false
+                aveVis = false
+
+                dataS.visibility = View.INVISIBLE
+                dataC.visibility = View.INVISIBLE
+                dataAve.visibility = View.INVISIBLE
+            }
 
             var textD:TextView = findViewById(R.id.text1)
             textD.visibility = View.INVISIBLE
@@ -356,8 +364,143 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             var bS:Button = findViewById(R.id.step)
             bS.visibility = View.INVISIBLE
 
-            var data:ListView = findViewById(R.id.list)
+            var dataMinMax:ListView = findViewById(R.id.minMax)
+            dataMinMax.visibility = View.VISIBLE
+
+
+            minMaxVis = true
+
+            true
+        }
+
+        R.id.rawStep -> {
+            var dataAve:ListView = findViewById(R.id.ave)
+            var dataMinMax:ListView = findViewById(R.id.minMax)
+            var dataRawClimb:ListView = findViewById(R.id.listClimb)
+
+
+
+            if (aveVis == true || minMaxVis == true || listClimbVis == true) {
+                aveVis = false
+                minMaxVis = false
+                listClimbVis = false
+
+                dataAve.visibility = View.INVISIBLE
+                dataMinMax.visibility = View.INVISIBLE
+                dataRawClimb.visibility =View.INVISIBLE
+            }
+
+            var textD:TextView = findViewById(R.id.text1)
+            textD.visibility = View.INVISIBLE
+
+            var textC:TextView = findViewById(R.id.climbCount)
+            textC.visibility = View.INVISIBLE
+
+            var textS:TextView = findViewById(R.id.stepCount)
+            textS.visibility = View.INVISIBLE
+
+            var bC:Button = findViewById(R.id.climb)
+            bC.visibility = View.INVISIBLE
+            var bS:Button = findViewById(R.id.step)
+            bS.visibility = View.INVISIBLE
+
+            var data:ListView = findViewById(R.id.listStep)
             data.visibility = View.VISIBLE
+
+            listStepVis = true
+
+            true
+        }
+
+        R.id.rawClimb -> {
+            var dataAve:ListView = findViewById(R.id.ave)
+            var dataMinMax:ListView = findViewById(R.id.minMax)
+            var dataRawStep:ListView = findViewById(R.id.listStep)
+
+
+
+            if (aveVis == true || minMaxVis == true || listStepVis == true) {
+                aveVis = false
+                minMaxVis = false
+                listStepVis = false
+
+                dataAve.visibility = View.INVISIBLE
+                dataMinMax.visibility = View.INVISIBLE
+                dataRawStep.visibility =View.INVISIBLE
+            }
+
+            var textD:TextView = findViewById(R.id.text1)
+            textD.visibility = View.INVISIBLE
+
+            var textC:TextView = findViewById(R.id.climbCount)
+            textC.visibility = View.INVISIBLE
+
+            var textS:TextView = findViewById(R.id.stepCount)
+            textS.visibility = View.INVISIBLE
+
+            var bC:Button = findViewById(R.id.climb)
+            bC.visibility = View.INVISIBLE
+            var bS:Button = findViewById(R.id.step)
+            bS.visibility = View.INVISIBLE
+
+            var data:ListView = findViewById(R.id.listClimb)
+            data.visibility = View.VISIBLE
+
+            listClimbVis = true
+
+            true
+        }
+
+        R.id.averages -> {
+
+            menuAvg.add("Current Step Average =  " + stepAvg.toString())
+            menuAvg.add("Current Climb Average =  " + climbAvg.toString())
+
+            arrayAdapterAve?.notifyDataSetChanged()
+
+            var dataS:ListView = findViewById(R.id.listStep)
+            var dataC:ListView = findViewById(R.id.listClimb)
+            var dataMinMax:ListView = findViewById(R.id.minMax)
+
+
+            if (listStepVis == true || listClimbVis == true || minMaxVis == true) {
+
+                listStepVis = false
+                listClimbVis = false
+                minMaxVis = false
+
+                dataS.visibility = View.INVISIBLE
+                dataC.visibility = View.INVISIBLE
+                dataMinMax.visibility = View.INVISIBLE
+            }
+
+            var textD:TextView = findViewById(R.id.text1)
+            textD.visibility = View.INVISIBLE
+
+            var textC:TextView = findViewById(R.id.climbCount)
+            textC.visibility = View.INVISIBLE
+
+            var textS:TextView = findViewById(R.id.stepCount)
+            textS.visibility = View.INVISIBLE
+
+            var bC:Button = findViewById(R.id.climb)
+            bC.visibility = View.INVISIBLE
+            var bS:Button = findViewById(R.id.step)
+            bS.visibility = View.INVISIBLE
+
+            var dataAve:ListView = findViewById(R.id.ave)
+            dataAve.visibility = View.VISIBLE
+
+            aveVis = true
+
+
+
+            true
+        }
+
+
+
+        R.id.view -> {
 
             true
         }
@@ -367,6 +510,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
             fileStep.writeText("walk =  " + infoStep.toString())
             infoStep.clear()
+
+            fileClimb.writeText("climb =  " + infoClimb.toString())
+            infoClimb.clear()
 
             fileClimb.writeText("climb =  " + infoClimb.toString())
             infoClimb.clear()
@@ -390,11 +536,24 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             stepView.text = "step"
             climbView.text = "climb"
             text1.text = "Get Ready!"
+
             infoStep.clear()
             sensorEventCounter = 0
             filterEventCounter = -1
-            menuList.clear()
+
+            stepCounter = 0
+            climbCounter = 0
+
+            menuRawStep.clear()
+            menuRawClimb.clear()
+
+            menuAvg.clear()
+            menuMaxMin.clear()
+
             arrayAdapter?.notifyDataSetChanged()
+            arrayAdapterAve?.notifyDataSetChanged()
+            arrayAdapterMinMax?.notifyDataSetChanged()
+
 
 
             infoClimb.clear()
@@ -419,8 +578,18 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             var bS:Button = findViewById(R.id.step)
             bS.visibility = View.VISIBLE
 
-            var data:ListView = findViewById(R.id.list)
-            data.visibility = View.INVISIBLE
+
+            var dataS:ListView = findViewById(R.id.listStep)
+            dataS.visibility = View.INVISIBLE
+
+            var dataC:ListView = findViewById(R.id.listClimb)
+            dataC.visibility = View.INVISIBLE
+
+            var dataAve:ListView = findViewById(R.id.ave)
+            dataAve.visibility = View.INVISIBLE
+
+            var dataMinMax:ListView = findViewById(R.id.minMax)
+            dataMinMax.visibility = View.INVISIBLE
 
             true
         }
@@ -431,15 +600,13 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     }
 
-    // stops sensor and changes booleans when ap paused
     override fun onPause() {
         super.onPause()
         stepClicked = false
         climbClicked = false
         sensorMan?.unregisterListener(this)
-    } // end on pause
+    }
 
-    // turns sensor back on on resume but removed because i want the sensor to start only when button is pressed
     override fun onResume() {
         super.onResume()
         //sensorMan?.registerListener(this, accel, SensorManager.SENSOR_DELAY_NORMAL)
