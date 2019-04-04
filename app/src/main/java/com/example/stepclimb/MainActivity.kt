@@ -34,11 +34,20 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     var sensorEventCounter = 0
     var filterEventCounter = -1
 
+    var totVect = arrayListOf<Double>()
     var totVectStep = arrayListOf<Double>()
     var totVectClimb = arrayListOf<Double>()
+    var xyzSensorDataList = arrayListOf<String>()
+
 
     var totAveStep = arrayListOf<Double>()
     var totAveClimb = arrayListOf<Double>()
+    var totAve = arrayListOf<Double>()
+
+    var aveStep = 0.0
+    var aveClimb = 0.0
+
+
 
 
     var xVal = arrayListOf<Double>()
@@ -56,14 +65,15 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     var yAve:Double = 0.0
     var zAve:Double = 0.0
 
-    var threshHoldStep = 10.3
-    var threshHoldClimb = 11.3
+    var threshHoldStep = 10.5
+    var threshHoldClimb = 10.5
 
 
     var flag = 0
 
     var indexS = 0
     var indexC = 0
+    var onSensorEventIndex = 0
     //var index = 0
 
 
@@ -93,8 +103,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     var climbAvg = 0.0
     var stepAvg = 0.0
 
-    var stepMin = 0.0
-    var climbMin = 0.0
+    var stepMin = 100.0
+    var climbMin = 100.0
 
     var stepMax = 0.0
     var climbMax = 0.0
@@ -122,16 +132,17 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     // file to save step data
     var fileStep = File(Environment.getExternalStoragePublicDirectory(
-        Environment.DIRECTORY_DOCUMENTS), "step.txt")
+        Environment.DIRECTORY_DOCUMENTS), "step vector data.txt")
     // file to save climb data
     var fileClimb = File(Environment.getExternalStoragePublicDirectory(
-        Environment.DIRECTORY_DOCUMENTS), "climb.txt")
+        Environment.DIRECTORY_DOCUMENTS), "climb vector data.txt")
     // file to save unfiltered pythag data
-    var filePythagUnfiltered = File(Environment.getExternalStoragePublicDirectory(
-        Environment.DIRECTORY_DOCUMENTS), "pythagoreanUnfiltered.txt")
-    // file to save filtered pythag data
-    var filePythag = File(Environment.getExternalStoragePublicDirectory(
-        Environment.DIRECTORY_DOCUMENTS), "pythagoreanFiltered.txt")
+    var xyzSensorData = File(Environment.getExternalStoragePublicDirectory(
+        Environment.DIRECTORY_DOCUMENTS), "xyzSensorData.txt")
+
+
+    var summaryData = File(Environment.getExternalStoragePublicDirectory(
+        Environment.DIRECTORY_DOCUMENTS), "summaryData.txt")
 
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
@@ -164,22 +175,26 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         yVal.add(event.values[1].toDouble())
         zVal.add(event.values[2].toDouble())
 
-        vector = (sqrt(((xVal[index]-xAve)* (xVal[index]-xAve))+ ((yVal[index] - yAve)*(yVal[index] - yAve)) + ((zVal[index] - zAve)*(zVal[index] - zAve))))
+        vector = (sqrt(((xVal[onSensorEventIndex]-xAve)* (xVal[onSensorEventIndex]-xAve))+ ((yVal[onSensorEventIndex] - yAve)*(yVal[onSensorEventIndex] - yAve)) + ((zVal[onSensorEventIndex] - zAve)*(zVal[onSensorEventIndex] - zAve))))
         //Log.i("info vector", vector.toString())
 
         //totVect.add(sqrt(((xVal[index]-xAve)* (xVal[index]-xAve))+ ((yVal[index] - yAve)*(yVal[index] - yAve)) + ((zVal[index] - zAve)*(zVal[index] - zAve))))
-        if (stepClicked == true)
+        totVect.add(vector)
+
+        if (stepClicked == true) {
             totVectStep.add(vector)
 
-            menuRawStep.add(totVectStep[index].toString())
+            menuRawStep.add(vector.toString())
             arrayAdapter?.notifyDataSetChanged()
+        }
 
-        if (climbClicked == true)
+        if (climbClicked == true) {
             totVectClimb.add(vector)
 
-            menuRawClimb.add(totVectStep[index].toString())
+            menuRawClimb.add(vector.toString())
             arrayAdapterClimb?.notifyDataSetChanged()
-
+        }
+//*******************************************************************************
 
 
 
@@ -188,21 +203,51 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
         //menuAvg.add(index.toString())
         //arrayAdapterAve?.notifyDataSetChanged()
+// ****************************************************************************
 
-        menuMaxMin.add(index.toString())
-        arrayAdapterMinMax?.notifyDataSetChanged()
-
-
-
-        if (index>1 && stepClicked == true) {
-            totAveStep.add(((totVectStep[index] + totVectStep[index - 1]) / 2))
-            stepAvg = totAveStep[totAveStep.size-1]
+        if (stepMax < vector && stepClicked == true) {
+            stepMax = vector
         }
 
-        if (index>1 && climbClicked == true) {
-            totAveClimb.add(((totVectClimb[index] + totVectClimb[index - 1]) / 2))
-            stepAvg = totAveStep[totAveStep.size-1]
+        if (stepMin > vector && stepClicked == true) {
+            stepMin = vector
         }
+
+        if (climbMax < vector && climbClicked == true) {
+            climbMax = vector
+        }
+
+        if (climbMin > vector && climbClicked == true) {
+            climbMin = vector
+        }
+// *****************************************************************************
+
+
+
+
+        //menuMaxMin.add(onSensorEventIndex.toString())
+        //arrayAdapterMinMax?.notifyDataSetChanged()
+
+
+
+        if (onSensorEventIndex > 1 ) {
+            totAve.add(((totVect[onSensorEventIndex] + totVect[onSensorEventIndex - 1]) / 2))
+            if (stepClicked == true) {
+
+                aveStep = (((totVect[onSensorEventIndex] + totVect[onSensorEventIndex - 1]) / 2))
+                //totAveStep.add(((totVectStep[index] + totVectStep[index - 1]) / 2))
+                //stepAvg = totAveStep[totAveStep.size-1]
+
+            }
+            if (climbClicked == true) {
+                aveClimb =(((totVect[onSensorEventIndex] + totVect[onSensorEventIndex - 1]) / 2))
+            }
+        }
+
+        //if (index>1 && climbClicked == true) {
+       //     totAveClimb.add(((totVectClimb[index] + totVectClimb[index - 1]) / 2))
+        //    stepAvg = totAveStep[totAveStep.size-1]
+        //}
 
         /*
         if (index>1 && climbClicked == true) {
@@ -215,40 +260,51 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             }
         }*/
 
+ // ********************************
+/*
+        if (onSensorEventIndex > 1) {
 
-
-        if (index > 1) {
-
-            if(totAveStep[index-2] > threshHoldStep && flag == 0) {
+            if(totAve[index-1] > threshHoldStep && flag == 0) {
                 stepCounter ++
                 flag = 1
 
             }
-            else if (totAveStep[index-2] > threshHoldStep && flag == 1) { }
+            else if (totAveStep[index-1] > threshHoldStep && flag == 1) { }
 
-            if (totAveStep[index-2] < threshHoldStep && flag == 1) {
+            if (totAveStep[index-1] < threshHoldStep && flag == 1) {
                 flag = 0
             }
         }
+        */
 
-        if (index > 1) {
+        // ********************
+/*
+        if (onSensorEventIndex > 1) {
 
-            if(totAveClimb[index-2] > threshHoldClimb && flag == 0) {
+            if(totAveClimb[index-1] > threshHoldClimb && flag == 0) {
                 stepCounter ++
                 flag = 1
 
             }
-            else if (totAveClimb[index-2] > threshHoldClimb && flag == 1) { }
+            else if (totAveClimb[index-1] > threshHoldClimb && flag == 1) { }
 
-            if (totAveClimb[index-2] < threshHoldClimb && flag == 1) {
+            if (totAveClimb[index-1] < threshHoldClimb && flag == 1) {
                 flag = 0
             }
+        } */
+
+
+
+        if (stepClicked == true) {
+            stepView.setText(stepCounter.toString())
+        }
+        if (climbClicked == true) {
+            climbView.setText(climbCounter.toString())
         }
 
-        stepView.setText(stepCounter.toString())
 
 
-        index ++
+        onSensorEventIndex ++
 
     }
 
@@ -261,7 +317,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
 
         listView = findViewById(R.id.listStep)
-        listView = findViewById(R.id.listClimb)
+        listViewClimb = findViewById(R.id.listClimb)
 
         listViewAvg = findViewById(R.id.ave)
         listViewMinMax = findViewById(R.id.minMax)
@@ -275,6 +331,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
 
         listView?.adapter = arrayAdapter
+        listViewClimb?.adapter = arrayAdapterClimb
+
         listViewAvg?.adapter = arrayAdapterAve
         listViewMinMax?.adapter = arrayAdapterMinMax
 
@@ -326,6 +384,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
 
     }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
         return true
@@ -334,6 +393,13 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     override fun onOptionsItemSelected(item: MenuItem)= when(item.itemId){
 
         R.id.maxMin -> {
+
+            menuMaxMin.add( "Maximum Step Value =  " + stepMax)
+            menuMaxMin.add( "Minimum Step Value =  " + stepMin)
+            menuMaxMin.add( "Maximum Climb Value =  " + climbMax)
+            menuMaxMin.add( "Minimum Climb Value =  " + climbMin)
+            arrayAdapterMinMax?.notifyDataSetChanged()
+
 
             var dataS:ListView = findViewById(R.id.listStep)
             var dataC:ListView = findViewById(R.id.listClimb)
@@ -453,8 +519,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
         R.id.averages -> {
 
-            menuAvg.add("Current Step Average =  " + stepAvg.toString())
-            menuAvg.add("Current Climb Average =  " + climbAvg.toString())
+            menuAvg.add("Current Step Average =  " + aveStep.toString())
+            menuAvg.add("Current Climb Average =  " + aveClimb.toString())
 
             arrayAdapterAve?.notifyDataSetChanged()
 
@@ -508,19 +574,19 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         R.id.write -> {
             //used to save all the arrays to files if the save button is pressed
 
-            fileStep.writeText("walk =  " + infoStep.toString())
+            fileStep.writeText("walk vector data =  " + totVectStep.toString())
             infoStep.clear()
 
-            fileClimb.writeText("climb =  " + infoClimb.toString())
+            fileClimb.writeText("climb vector data =  " + totVectClimb.toString())
             infoClimb.clear()
 
-            fileClimb.writeText("climb =  " + infoClimb.toString())
-            infoClimb.clear()
+            //fileClimb.writeText("climb =  " + infoClimb.toString())
+            //infoClimb.clear()
 
-            filePythag.writeText("Pythagorean Filtered Data (X,Y,Z) =  " + infoPythagFiltered.toString())
+            xyzSensorData.writeText("Sensor Data (X,Y,Z) =  " + infoPythagFiltered.toString())
             infoPythagFiltered.clear()
 
-            filePythagUnfiltered.writeText("Pythagorean Unfiltered Data (X, Y, Z) =  " + infoPythagUnfiltered.toString())
+            summaryData.writeText("Summary to do =  " )
             infoPythagUnfiltered.clear()
 
             true
