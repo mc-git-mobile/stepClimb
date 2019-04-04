@@ -96,17 +96,14 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     var infoStep = arrayListOf<String>()
     var infoClimb = arrayListOf<String>()
-    //var infoPythagUnfilteredExtra = arrayListOf<String>()
-
     var infoPythagFiltered = arrayListOf<Double>()
     var infoPythagUnfiltered = arrayListOf<Double>()
 
     var vector = 0.0
     var vectorM = 0.0
 
+    var average = 0.0
 
-    var climbAvg = 0.0
-    var stepAvg = 0.0
 
     var stepMin = 100.0
     var climbMin = 100.0
@@ -114,9 +111,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     var stepMax = 0.0
     var climbMax = 0.0
 
-
-
-    var pythagUnfiltered:Double = 0.0
 
 
 
@@ -183,9 +177,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         vector = (sqrt(((xVal[onSensorEventIndex]-xAve)* (xVal[onSensorEventIndex]-xAve))+ ((yVal[onSensorEventIndex] - yAve)*(yVal[onSensorEventIndex] - yAve)) + ((zVal[onSensorEventIndex] - zAve)*(zVal[onSensorEventIndex] - zAve))))
         vectorM = (sqrt(((xVal[onSensorEventIndex])* (xVal[onSensorEventIndex]))+ ((yVal[onSensorEventIndex])*(yVal[onSensorEventIndex])) + ((zVal[onSensorEventIndex])*(zVal[onSensorEventIndex]))))
 
-        //Log.i("info vector", vector.toString())
 
-        //totVect.add(sqrt(((xVal[index]-xAve)* (xVal[index]-xAve))+ ((yVal[index] - yAve)*(yVal[index] - yAve)) + ((zVal[index] - zAve)*(zVal[index] - zAve))))
         totVect.add(vector)
 
         if (stepClicked == true) {
@@ -229,14 +221,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
 // *****************************************************************************
 
-
-
-
-        //menuMaxMin.add(onSensorEventIndex.toString())
-        //arrayAdapterMinMax?.notifyDataSetChanged()
-
-
-
         if (onSensorEventIndex > 1 ) {
             totAve.add(((totVect[onSensorEventIndex] + totVect[onSensorEventIndex - 1]) / 2))
             if (stepClicked == true) {
@@ -251,7 +235,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             }
         }
 
-        // ******************climb***************************************
+
         //Log.i("info climb", "pre vectorM " + vectorM.toString() )
         //Log.i("info climb", "pre threshold climb" + threshHoldClimb.toString() + "  " + (threshHoldClimb -1).toString())
         //Log.i("info climb", "pre flagM " + flagM.toString() )
@@ -263,38 +247,29 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         if (vectorM > threshHoldClimb && flagM == 0 && climbClicked == true) {
             climbCounter ++
             flagM = 1
-            climbView.text = (climbCounter.toString())
+            climbView.text = ("Stairs: " + climbCounter.toString())
         }
 
         else if (vectorM < (threshHoldClimb -1) && flagM ==1 && climbClicked == true ) {
             flagM = 0
         }
+//****************************************************************************
+        if (vectorM > threshHoldClimb && stepClicked == true) {
 
+            average = (average + vectorM)/2
 
-
-
-
-// ????????????????????????????????????????????????????????????????????
-        /*
-            if(infoPythagFiltered.size > 2 && infoPythagFiltered[filterEventCounter - 1] > 10.5) {
-
-                count++
-                average =  ( average + infoPythagFiltered[filterEventCounter-1] ) / count
-
-                if (infoPythagFiltered[filterEventCounter - 1] > average - 1) {
-                    steps++
-                    pedo.text = "Steps: " + steps
-                }
-            }*/
-
-//???????????????????????????????????????????????????????????????????????
+            if (vectorM > (average - 0.5)) {
+                stepCounter ++
+                stepView.text = ("Steps: " + stepCounter)
+            }
+        }
 
 
         if (stepClicked == true) {
-            stepView.setText(stepCounter.toString())
+            //stepView.setText(stepCounter.toString())
         }
         if (climbClicked == true) {
-            climbView.setText(climbCounter.toString())
+            //climbView.setText(climbCounter.toString())
         }
 
         onSensorEventIndex ++
@@ -597,8 +572,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             var stepView:TextView = findViewById(R.id.stepCount)
             var climbView:TextView = findViewById(R.id.climbCount)
 
-            stepView.text = "step"
-            climbView.text = "climb"
+            stepView.text = "Steps"
+            climbView.text = "Stairs"
             text1.text = "Get Ready!"
 
             infoStep.clear()
@@ -610,19 +585,48 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
             menuRawStep.clear()
             menuRawClimb.clear()
-
             menuAvg.clear()
             menuMaxMin.clear()
 
+
             arrayAdapter?.notifyDataSetChanged()
+            arrayAdapterClimb?.notifyDataSetChanged()
             arrayAdapterAve?.notifyDataSetChanged()
             arrayAdapterMinMax?.notifyDataSetChanged()
 
-
-
+            totVect
+            totVectStep
+            totVectClimb
+            xyzSensorDataList
+            totAveStep
+            totAveClimb
+            totAve
+            xVal.clear()
+            yVal.clear()
+            zVal.clear()
+            xAve = 0.0
+            yAve = 0.0
+            zAve = 0.0
+            onSensorEventIndex = 0
+            stepCounter = 0
+            climbCounter = 0
+            menuRawStep.clear()
+            menuRawClimb.clear()
+            menuAvg.clear()
+            menuMaxMin.clear()
+            infoStep.clear()
             infoClimb.clear()
             infoPythagFiltered.clear()
             infoPythagUnfiltered.clear()
+
+            vector = 0.0
+            vectorM = 0.0
+            average = 0.0
+            stepMin = 100.0
+            climbMin = 100.0
+            stepMax = 0.0
+            climbMax = 0.0
+
 
             true
         }
@@ -673,6 +677,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onResume() {
         super.onResume()
-        //sensorMan?.registerListener(this, accel, SensorManager.SENSOR_DELAY_NORMAL)
-    } // end on resume
-} //end class
+        sensorMan?.registerListener(this, accel, SensorManager.SENSOR_DELAY_NORMAL)
+    }
+}

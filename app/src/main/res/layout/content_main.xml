@@ -21,7 +21,7 @@
     <TextView
             android:layout_width="149dp"
             android:layout_height="90dp"
-            android:text="climb"
+            android:text="Stairs"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
@@ -37,7 +37,7 @@
     <TextView
             android:layout_width="149dp"
             android:layout_height="90dp"
-            android:text="step"
+            android:text="Steps"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
