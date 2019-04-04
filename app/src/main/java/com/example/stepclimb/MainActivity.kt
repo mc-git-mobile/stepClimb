@@ -66,10 +66,13 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     var zAve:Double = 0.0
 
     var threshHoldStep = 10.5
+
     var threshHoldClimb = 10.5
 
 
     var flag = 0
+    var flagM = 0
+
 
     var indexS = 0
     var indexC = 0
@@ -99,6 +102,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     var infoPythagUnfiltered = arrayListOf<Double>()
 
     var vector = 0.0
+    var vectorM = 0.0
+
 
     var climbAvg = 0.0
     var stepAvg = 0.0
@@ -176,6 +181,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         zVal.add(event.values[2].toDouble())
 
         vector = (sqrt(((xVal[onSensorEventIndex]-xAve)* (xVal[onSensorEventIndex]-xAve))+ ((yVal[onSensorEventIndex] - yAve)*(yVal[onSensorEventIndex] - yAve)) + ((zVal[onSensorEventIndex] - zAve)*(zVal[onSensorEventIndex] - zAve))))
+        vectorM = (sqrt(((xVal[onSensorEventIndex])* (xVal[onSensorEventIndex]))+ ((yVal[onSensorEventIndex])*(yVal[onSensorEventIndex])) + ((zVal[onSensorEventIndex])*(zVal[onSensorEventIndex]))))
+
         //Log.i("info vector", vector.toString())
 
         //totVect.add(sqrt(((xVal[index]-xAve)* (xVal[index]-xAve))+ ((yVal[index] - yAve)*(yVal[index] - yAve)) + ((zVal[index] - zAve)*(zVal[index] - zAve))))
@@ -244,55 +251,43 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             }
         }
 
-        //if (index>1 && climbClicked == true) {
-       //     totAveClimb.add(((totVectClimb[index] + totVectClimb[index - 1]) / 2))
-        //    stepAvg = totAveStep[totAveStep.size-1]
-        //}
+        // ******************climb***************************************
+        //Log.i("info climb", "pre vectorM " + vectorM.toString() )
+        //Log.i("info climb", "pre threshold climb" + threshHoldClimb.toString() + "  " + (threshHoldClimb -1).toString())
+        //Log.i("info climb", "pre flagM " + flagM.toString() )
+        //Log.i("info climb", "pre climbCounter " + climbCounter.toString() )
+        //Log.i("info b", "climb boolean " + climbClicked.toString() )
 
-        /*
-        if (index>1 && climbClicked == true) {
-            totAve.add(((totVect[index] + totVect[index - 1]) / 2))
-            if (stepClicked == true) {
-                stepAvg = totAve[totAve.size-1]
-            }
-            if (climbClicked == true) {
-                climbAvg = totAve[totAve.size-1]
-            }
-        }*/
 
- // ********************************
-/*
-        if (onSensorEventIndex > 1) {
 
-            if(totAve[index-1] > threshHoldStep && flag == 0) {
-                stepCounter ++
-                flag = 1
-
-            }
-            else if (totAveStep[index-1] > threshHoldStep && flag == 1) { }
-
-            if (totAveStep[index-1] < threshHoldStep && flag == 1) {
-                flag = 0
-            }
+        if (vectorM > threshHoldClimb && flagM == 0 && climbClicked == true) {
+            climbCounter ++
+            flagM = 1
+            climbView.text = (climbCounter.toString())
         }
-        */
 
-        // ********************
-/*
-        if (onSensorEventIndex > 1) {
+        else if (vectorM < (threshHoldClimb -1) && flagM ==1 && climbClicked == true ) {
+            flagM = 0
+        }
 
-            if(totAveClimb[index-1] > threshHoldClimb && flag == 0) {
-                stepCounter ++
-                flag = 1
 
-            }
-            else if (totAveClimb[index-1] > threshHoldClimb && flag == 1) { }
 
-            if (totAveClimb[index-1] < threshHoldClimb && flag == 1) {
-                flag = 0
-            }
-        } */
 
+
+// ????????????????????????????????????????????????????????????????????
+        /*
+            if(infoPythagFiltered.size > 2 && infoPythagFiltered[filterEventCounter - 1] > 10.5) {
+
+                count++
+                average =  ( average + infoPythagFiltered[filterEventCounter-1] ) / count
+
+                if (infoPythagFiltered[filterEventCounter - 1] > average - 1) {
+                    steps++
+                    pedo.text = "Steps: " + steps
+                }
+            }*/
+
+//???????????????????????????????????????????????????????????????????????
 
 
         if (stepClicked == true) {
@@ -301,8 +296,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         if (climbClicked == true) {
             climbView.setText(climbCounter.toString())
         }
-
-
 
         onSensorEventIndex ++
 
@@ -349,8 +342,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
             if (stepClicked == false) {
                 stepClicked = true
+                step.text = "Stop Walking"
                 if(climbClicked == true) {
                     climbClicked = false
+                    climb.text = "Start Climbing"
                 }
                 //val file = File(fileNameStep)
                 sensorMan.registerListener(this, sensorMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL)
@@ -361,6 +356,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             else if (stepClicked == true) {
                 stepClicked = false
                 sensorMan.unregisterListener(this)
+                step.text = "Start Walking"
             }
 
         }
@@ -368,9 +364,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         climb.setOnClickListener {
             if (climbClicked == false) {
                 climbClicked = true
+                climb.text = "Stop Climbing"
                 if(stepClicked == true) {
                     stepClicked = false
+                    step.text = "Start Walking"
                 }
+
 
                 //val file = File(fileNameClimb)
                 sensorMan.registerListener(this, sensorMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL)
@@ -379,6 +378,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             else if (climbClicked == true) {
                 climbClicked = false
                 sensorMan.unregisterListener(this)
+                climb.text = "Start Climbing"
             }
 
         }
@@ -563,8 +563,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
             true
         }
-
-
 
         R.id.view -> {
 
