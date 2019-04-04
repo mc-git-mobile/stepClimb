@@ -34,6 +34,24 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     var sensorEventCounter = 0
     var filterEventCounter = -1
 
+    var totVect = arrayListOf<Double>()
+    var totAve = arrayListOf<Double>()
+
+    var xVal = arrayListOf<Double>()
+    var yVal = arrayListOf<Double>()
+    var zVal = arrayListOf<Double>()
+
+    var xAve:Double = 0.0
+    var yAve:Double = 0.0
+    var zAve:Double = 0.0
+
+    var threshHold = 10.5
+
+    var flag = 0
+
+    var index = 0
+    var steps = 0
+
 
     // just using these to compare one value to the next but my idea didnt work anyway
     var counterPost = 3 //counter to get next value
@@ -94,20 +112,70 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         var climbView:TextView = findViewById(R.id.climbCount)
 
 
-        infoX.add(event!!.values[1]) // adding just y data to and array on each sensor event to test a counting method
+        //infoX.add(event!!.values[1]) // adding just y data to and array on each sensor event to test a counting method
 
         // combine axis using pythagorean theorem
-        pU = (event.values[0].toDouble()*event.values[0].toDouble())+(event.values[1].toDouble()*event.values[1].toDouble())+(event.values[2].toDouble()*event.values[2].toDouble())
-        pythagUnfiltered = sqrt(pU)  //getting combination of all axis
+        //pU = (event.values[0].toDouble()*event.values[0].toDouble())+(event.values[1].toDouble()*event.values[1].toDouble())+(event.values[2].toDouble()*event.values[2].toDouble())
+        //pythagUnfiltered = sqrt(pU)  //getting combination of all axis
 
         // adding pythag data to unfiltered array
-        infoPythagUnfiltered.add(pythagUnfiltered)
+        //infoPythagUnfiltered.add(pythagUnfiltered)
+
+        xVal.add(event!!.values[0].toDouble())
+        yVal.add(event.values[1].toDouble())
+        zVal.add(event.values[2].toDouble())
+
+        //totVect.add() = sqrt(  ( (xVal[index] - xAve)*(xVal[index] - xAve).toFloat() )  )
+        totVect.add(sqrt(((xVal[index]-xAve)* (xVal[index]-xAve))+ ((yVal[index] - yAve)*(yVal[index] - yAve)) + ((zVal[index] - zAve)*(zVal[index] - zAve))))
+
+        if (index>1) {
+            totAve.add(((totVect[index] + totVect[index - 1]) / 2))
+        }
+
+        if (index > 1) {
+
+            if(totAve[index-2] > threshHold && flag == 0) {
+                steps ++
+                flag = 1
+
+                //stepView.setText(steps)
+            }
+            else if (totAve[index-2] > threshHold && flag == 1) {
+
+            }
+
+            if (totAve[index-2] < threshHold && flag == 1) {
+                flag = 0
+            }
+
+        }
+        stepView.setText(steps.toString())
+
+/*
+        if(index>0 && totAve[index] > threshHold && flag == 0) {
+            steps ++
+            flag = 1
+
+            stepView.setText(steps)
+        }
+        else if (index>0 && totAve[index] > threshHold && flag == 1) {
+
+        }
+
+        if (index>0 && totAve[index] < threshHold && flag == 1) {
+            flag = 0
+        }*/
+        index ++
 
 
 
 
+
+        /*
         // filtering pythagorean data to show only peaks and valleys
         if (infoPythagUnfiltered.size > 3) {
+
+
 
             if ( (infoPythagUnfiltered[sensorEventCounter-1] > infoPythagUnfiltered[sensorEventCounter-2]) && (infoPythagUnfiltered[sensorEventCounter-1] > infoPythagUnfiltered[sensorEventCounter]) ) {
                 infoPythagFiltered.add(infoPythagUnfiltered[sensorEventCounter-1])
@@ -116,8 +184,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
                // if (infoPythagFiltered[])
                 filterEventCounter +=1
-
-
 
                 //  ||                                                         ||
                 //  \/  counters not being used probably useless all together  \/
@@ -131,7 +197,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
                 filterEventCounter +=1
 
-
                 //  ||                                                         ||
                 //  \/  counters not being used probably useless all together  \/
                 //counterPre++
@@ -139,37 +204,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             }
         }
 
-        /*
-        if (infoPythag.size > j){
-            if ((infoPythag[j] - infoPythag[h]) > 0.05 /*|| (infoN[h] - infoN[j]) < (- 0.05)*/ ){
-                step ++
-            }
-        }
-        stepView.setText(step.toString()) // set step view to step counter
-        */
-
-
 
         // just testing a method to see if i could only count peaks but peaks don't represent steps
         if (infoPythagFiltered.size > 3) {
-/*
-            if ( (infoPythagFiltered[filterEventCounter-1] > infoPythagFiltered[filterEventCounter-2]) && (infoPythagFiltered[filterEventCounter-1] > infoPythagFiltered[filterEventCounter]) && (infoPythagFiltered[filterEventCounter-1] > 10.5) ) {
-                if (stepClicked == true) {
-                    stepCounter +=1
 
-                    Log.i ("info step counter", stepCounter.toString())
-                    Log.i ("info step pF -1", infoPythagFiltered[filterEventCounter-1].toString())
-                    Log.i ("info step pF -2", infoPythagFiltered[filterEventCounter-2].toString())
-                    Log.i ("info step pF", infoPythagFiltered[filterEventCounter-0].toString())
 
-                }
-
-                if (climbClicked == true) {
-                    climbCounter += 1
-                    Log.i ("info climb counter", climbCounter.toString())
-
-                }
-            }*/
             
             if ( (infoPythagFiltered[filterEventCounter-1] - infoPythagFiltered[filterEventCounter]) > abs(1.5)  && (infoPythagFiltered[filterEventCounter-1] - infoPythagFiltered[filterEventCounter]) < abs(4) ) {
                 if (stepClicked == true) {
@@ -180,21 +219,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     climbCounter += 1
                 }
             }
-
-            
-            
             
         }
 
 
-        /*
-        if (infoX.size > 3) {
-            if ( (infoX[i-1] > infoX[i-2]) && (infoX[i-1] > infoX[i]) ) {
-                //stepCounter +=1
-                //climbCounter += 1
-                // stepBox.setText(stepCounter)
-            }
-        }*/
 
 
         if (stepClicked == true) {
@@ -229,19 +257,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                           " y = ${event.values[1]}, " +
                           " z = ${event.values[2]}  +")
         } //  Not being used right now
-
-        /*
-        if (stepB == true) {
-            infoStep.add(" x = ${event!!.values[0]}, " +
-                    " y = ${event.values[1]}, " +
-                    " z = ${event.values[2]}  +")
-        }
-
-        if (climbB == true) {
-            infoClimb.add(" x = ${event!!.values[0]}, " +
-                            " y = ${event.values[1]}, " +
-                        " z = ${event.values[2]}  +")
-        }*/
+        */
 
     }
 
