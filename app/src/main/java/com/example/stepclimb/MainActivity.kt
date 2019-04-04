@@ -21,6 +21,7 @@ import kotlinx.android.synthetic.main.content_main.*
 import java.io.*
 import java.io.File
 import java.lang.Math.sqrt
+//import kotlin.math.sqrt
 
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
@@ -67,7 +68,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private var listView: ListView? = null // list view for action bar to show data if needed
 
     private var listSensorData = arrayListOf<String>()  //used to store sensor data will implement eventually
-
+    private var flag = 0
 
     // file to save step data
     var fileStep = File(Environment.getExternalStoragePublicDirectory(
@@ -115,16 +116,24 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 filterEventCounter +=1
 
 
-                if(infoPythagFiltered.size > 2 && infoPythagFiltered[filterEventCounter - 1] > 10.5) {
 
-                    count++
-                    average =  ( average + infoPythagFiltered[filterEventCounter-1] ) / count
 
-                    if (infoPythagFiltered[filterEventCounter - 1] > average - 1) {
-                        steps++
-                        pedo.text = "Steps: " + steps
-                    }
-                }
+
+
+               // var flag = 0
+                //if(infoPythagFiltered.size > 2 && infoPythagFiltered[filterEventCounter - 1] > 10.75) {
+
+                  //  count++
+                    //average =  ( average + infoPythagFiltered[filterEventCounter-1] ) / count
+
+                    //if (infoPythagFiltered[filterEventCounter - 1] > average - .5) {
+                      //  steps++
+                        //pedo.text = "Steps: " + steps
+                    //}
+                //}
+
+                //for best original (10.5    -1)
+                //current (10.5 -.05
 
 
 
@@ -216,6 +225,16 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     "y = ${event.values[1]}\n\n" +
                     "z = ${event.values[2]}\n\n"
 
+        climbCount.text = pythagUnfiltered.toString()
+
+        //This is the new algorithm for at least stairs, it seems pretty accurate as far as I can tell
+        if(pythagUnfiltered > 10.5 && flag == 0) {
+            steps++
+            flag = 1
+            pedo.text = "Steps: " + steps
+        }else if(pythagUnfiltered < 9.5 && flag == 1){
+            flag = 0
+        }
 
         // array to store steps adding event values to is if step button is pressed
         if (stepClicked == true) {
