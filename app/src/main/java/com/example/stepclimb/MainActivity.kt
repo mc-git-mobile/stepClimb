@@ -121,19 +121,19 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
 
                // var flag = 0
-                //if(infoPythagFiltered.size > 2 && infoPythagFiltered[filterEventCounter - 1] > 10.75) {
+                if(infoPythagFiltered.size > 2 && infoPythagFiltered[filterEventCounter - 1] > 10.75) {
 
-                  //  count++
-                    //average =  ( average + infoPythagFiltered[filterEventCounter-1] ) / count
+                   count++
+                    average =  ( average + infoPythagFiltered[filterEventCounter-1] ) / count
 
-                    //if (infoPythagFiltered[filterEventCounter - 1] > average - .5) {
-                      //  steps++
-                        //pedo.text = "Steps: " + steps
-                    //}
-                //}
+                    if (infoPythagFiltered[filterEventCounter - 1] > average - .5) {
+                        steps++
+                        pedo.text = "Steps: " + steps
+                    }
+                }
 
                 //for best original (10.5    -1)
-                //current (10.5 -.05
+                //current (10.5 -.5
 
 
 
